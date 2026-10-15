@@ -44,4 +44,13 @@ cmd_status() { require_docker; }
 cmd_restart() {
   [[ $# -eq 1 ]] || usage_error "restart attend un service, par exemple : scripts/db restart pg"
   require_docker
+  load_env
+  with_profiles
+  local services
+  services="$(compose config --services)"
+  grep -qx -- "$1" <<<"$services" || die "service inconnu : $1 (services actifs : $(paste -sd' ' - <<<"$services"))"
+  config_sync
+  compose restart "$1"
+  compose up -d --wait --wait-timeout 120 "$1" || die "$1 ne redémarre pas : scripts/db status, puis docker compose -p dba logs $1"
+  info "$1 redémarré avec la configuration de project/"
 }

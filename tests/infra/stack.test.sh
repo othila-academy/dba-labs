@@ -50,3 +50,12 @@ check "schéma en erreur : code 1" expect_exit 1 env DBA_PROJECT="$SANDBOX/proje
 rm -f "$SANDBOX/project/schema/002_cassee.sql"
 check "projet vide : rebuild le dit et passe" output_matches 'aucun fichier dans project/schema' "$DB" rebuild
 rm -rf "$SANDBOX"
+
+# Un réglage dans project/config/postgres/conf.d/, pris en compte par restart.
+SPIKE_CONF="$DBA_PROJECT/config/postgres/conf.d/99-spike.conf"
+"$DB" up >/dev/null
+echo "work_mem = '7MB'" >"$SPIKE_CONF"
+check "restart pg : relit project/config" bash -c "'$DB' restart pg >/dev/null && [[ \"\$(PGPASSWORD='$POSTGRES_PASSWORD' psql -h pg -U postgres -tAXc 'show work_mem')\" == 7MB ]]"
+rm -f "$SPIKE_CONF"
+check "restart pg : réglage retiré, valeur par défaut" bash -c "'$DB' restart pg >/dev/null && [[ \"\$(PGPASSWORD='$POSTGRES_PASSWORD' psql -h pg -U postgres -tAXc 'show work_mem')\" == 4MB ]]"
+check "restart d'un service inconnu : message et code 1" output_matches '^erreur : service inconnu : pgg' "$DB" restart pgg
