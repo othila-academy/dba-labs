@@ -29,3 +29,24 @@ check "down : se termine sans erreur" "$DB" down
 check "down : plus aucun conteneur du projet" no_dba_containers
 check "down : plus aucun volume du projet, dba-config compris" no_dba_volumes
 check "down sur une stack arrêtée : code 0" "$DB" down
+
+# rebuild sur un projet de test : une copie de project/ avec deux fichiers SQL et un script Mongo.
+SANDBOX="$(mktemp -d)"
+cp -R "$DBA_PROJECT" "$SANDBOX/project"
+mkdir -p "$SANDBOX/project/schema" "$SANDBOX/project/mongo"
+echo 'create database valmorin;' >"$SANDBOX/project/schema/000_database.sql"
+echo 'create table essai (id int primary key);' >"$SANDBOX/project/schema/001_essai.sql"
+echo 'db.essai.insertOne({ ok: 1 });' >"$SANDBOX/project/mongo/001_essai.js"
+mongo_rs() { mongosh --quiet "mongodb://mongo1:27017/valmorin?replicaSet=rs0" --eval "$1"; }
+
+check "rebuild : se termine sans erreur" env DBA_PROJECT="$SANDBOX/project" "$DB" rebuild
+check "rebuild : rs0 a un primaire" equals "$(mongosh --quiet 'mongodb://mongo1:27017/?replicaSet=rs0' --eval 'db.hello().isWritablePrimary')" true
+check "rebuild : 000 joué sur postgres, 001 sur valmorin" equals "$(pg_sql valmorin "select to_regclass('essai') is not null")" t
+check "rebuild : project/mongo joué sur valmorin" equals "$(mongo_rs 'db.essai.countDocuments()')" 1
+check "rebuild : une seconde fois, même résultat" bash -c "DBA_PROJECT='$SANDBOX/project' '$DB' rebuild >/dev/null && [[ \"\$(PGPASSWORD='$POSTGRES_PASSWORD' psql -h pg -U postgres -d valmorin -tAXc 'select count(*) from essai')\" == 0 ]]"
+echo 'create tabl cassee (id int);' >"$SANDBOX/project/schema/002_cassee.sql"
+check "schéma en erreur : rebuild nomme le fichier" output_matches '002_cassee\.sql a échoué' env DBA_PROJECT="$SANDBOX/project" "$DB" rebuild
+check "schéma en erreur : code 1" expect_exit 1 env DBA_PROJECT="$SANDBOX/project" "$DB" rebuild
+rm -f "$SANDBOX/project/schema/002_cassee.sql"
+check "projet vide : rebuild le dit et passe" output_matches 'aucun fichier dans project/schema' "$DB" rebuild
+rm -rf "$SANDBOX"

@@ -2,7 +2,8 @@
 # Tous les tests de l'infrastructure, dans le devcontainer : shellcheck, outillage, interface, puis scénario complet.
 set -uo pipefail
 DBA_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-export DBA_ROOT
+DBA_PROJECT="${DBA_PROJECT:-$DBA_ROOT/project}"
+export DBA_ROOT DBA_PROJECT
 # shellcheck source=tests/infra/lib.sh
 source "$DBA_ROOT/tests/infra/lib.sh"
 
