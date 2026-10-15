@@ -6,6 +6,7 @@ USAGE="usage : scripts/db <commande>
   down                arrête les bases et supprime leurs volumes
   rebuild             reconstruit tout depuis project/ : down, up, rs0, schéma, scripts Mongo
   restart <service>   recopie la configuration de project/ et redémarre un service (ex. pg)
+  reload <service>    recopie la configuration de project/ et la fait relire sans redémarrer (pg, pg-legacy)
   status              état des services, versions, rôle de chaque nœud Mongo
   psql [rôle] [base]  se connecter à PostgreSQL (postgres sur la base postgres par défaut)
   mongosh [nœud]      se connecter à MongoDB (le replica set rs0 par défaut, ou un nœud : mongo2)

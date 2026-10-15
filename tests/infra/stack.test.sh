@@ -87,3 +87,18 @@ check "down puis up : rs0 a un primaire, sans rebuild" bash -c "'$DB' down >/dev
 if in_container; then
   check "identifiant du devcontainer lu sans dépendre du hostname" bash -c "source '$DBA_ROOT/scripts/lib/common.sh'; source '$DBA_ROOT/scripts/lib/stack.sh'; [[ \"\$(self_container_id)\" == \"\$(docker inspect \"\$(hostname)\" --format '{{.Id}}')\" ]]"
 fi
+
+# reload : recharger sans redémarrer ; dire quand un paramètre exige un redémarrage.
+RELOAD="$(mktemp -d)"
+cp -R "$DBA_PROJECT" "$RELOAD/project"
+DBA_PROJECT="$RELOAD/project" "$DB" up >/dev/null
+started="$(docker inspect dba-pg-1 --format '{{.State.StartedAt}}')"
+echo "work_mem = '9MB'" >"$RELOAD/project/config/postgres/conf.d/50-reload.conf"
+check "reload pg : nouveau work_mem sans redémarrage" bash -c "DBA_PROJECT='$RELOAD/project' '$DB' reload pg >/dev/null && [[ \"\$(PGPASSWORD='$POSTGRES_PASSWORD' psql -h pg -U postgres -tAXc 'show work_mem')\" == 9MB ]]"
+check "reload pg : le serveur n'a pas redémarré" equals "$(docker inspect dba-pg-1 --format '{{.State.StartedAt}}')" "$started"
+echo "shared_preload_libraries = 'pg_stat_statements'" >"$RELOAD/project/config/postgres/conf.d/60-preload.conf"
+check "reload pg : un paramètre à redémarrage est signalé" output_matches 'shared_preload_libraries.*scripts/db restart pg' env DBA_PROJECT="$RELOAD/project" "$DB" reload pg
+check "reload sans service : code 2" expect_exit 2 "$DB" reload
+check "reload d'un service non PostgreSQL : message et code 1" output_matches '^erreur : reload ne sait recharger que pg' "$DB" reload mongo1
+rm -rf "$RELOAD"
+"$DB" restart pg >/dev/null

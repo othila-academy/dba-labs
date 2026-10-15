@@ -86,3 +86,28 @@ cmd_restart() {
   compose up -d --wait --wait-timeout 120 "$1" || die "$1 ne redémarre pas : scripts/db status, puis docker compose -p dba logs $1"
   info "$1 redémarré avec la configuration de project/"
 }
+
+# reload : la configuration recopiée, puis rechargée sans couper les connexions. Les paramètres qui
+# exigent un redémarrage (shared_preload_libraries, shared_buffers…) restent en attente : on le dit.
+cmd_reload() {
+  [[ $# -eq 1 ]] || usage_error "reload attend un service, par exemple : scripts/db reload pg"
+  [[ $1 == pg || $1 == pg-legacy ]] || die "reload ne sait recharger que pg et pg-legacy : pour $1, scripts/db restart $1"
+  require_stack
+  load_env
+  with_profiles
+  config_sync
+  local sql=(env PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$1" -U postgres -d postgres -qtAX)
+  local before pending _
+  before="$("${sql[@]}" -c 'select pg_conf_load_time()')" || die "$1 ne répond pas : scripts/db status"
+  "${sql[@]}" -c 'select pg_reload_conf()' >/dev/null || die "$1 ne répond pas : scripts/db status"
+  # La relecture est asynchrone : on attend que le serveur l'ait faite (5 s au plus) avant de lire ce qui reste en attente.
+  for _ in $(seq 1 50); do
+    [[ "$("${sql[@]}" -c 'select pg_conf_load_time()')" != "$before" ]] && break
+    sleep 0.1
+  done
+  pending="$("${sql[@]}" -c "select string_agg(name, ', ' order by name) from pg_settings where pending_restart")"
+  info "$1 a relu sa configuration"
+  if [[ -n $pending ]]; then
+    info "ces paramètres ne changeront qu'au redémarrage : $pending → scripts/db restart $1"
+  fi
+}
