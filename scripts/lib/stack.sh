@@ -44,7 +44,8 @@ cmd_status() {
   load_env
   all_profiles
   attach_devcontainer
-  compose ps --format 'table {{.Service}}\t{{.State}}\t{{.Health}}'
+  # En-tête à nous : Compose 5 laisse la colonne santé sans titre (« <no value> »).
+  { printf 'service\tétat\tsanté\n'; compose ps --format '{{.Service}}\t{{.State}}\t{{.Health}}'; } | column -t -s $'\t'
   local version
   if version="$(run_psql postgres -tAc 'show server_version' 2>/dev/null)"; then
     info "PostgreSQL $version"

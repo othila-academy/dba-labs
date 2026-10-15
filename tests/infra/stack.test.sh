@@ -75,3 +75,4 @@ check "mongosh : le raccourci joint rs0" output_matches '^true$' "$DB" mongosh -
 check "mongosh mongo2 : connexion directe à un nœud" output_matches '^(true|false)$' "$DB" mongosh mongo2 --eval 'db.hello().isWritablePrimary'
 check "doctor : vert sur cette machine" "$DB" doctor
 check "doctor : Docker injoignable, ✗ et code 1" expect_exit 1 env DOCKER_HOST=unix:///nonexistent "$DB" doctor
+check "status : en-tête du tableau en français, sans « <no value> »" bash -c "out=\"\$('$DB' status)\"; grep -q '^service *état *santé' <<<\"\$out\" && ! grep -q 'no value' <<<\"\$out\""
