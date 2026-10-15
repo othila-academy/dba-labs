@@ -9,6 +9,8 @@ cmd_up() {
   compose up -d --wait --wait-timeout 120 \
     || die "les bases ne sont pas prêtes après 120 s : scripts/db status, puis docker compose -p dba logs"
   attach_devcontainer
+  # rs0 se réinitialise après un down (volumes neufs) : sans cela, MongoDB refuserait toute écriture.
+  rs_init
   info "bases prêtes"
 }
 
@@ -26,12 +28,20 @@ cmd_attach() {
   attach_devcontainer
 }
 
+# L'identifiant de ce conteneur : lu dans mountinfo, car sur Codespaces le hostname n'est pas l'identifiant ;
+# à défaut, le hostname, qui l'est sous Docker Desktop et Docker Engine.
+self_container_id() {
+  local id
+  id="$(grep -o 'containers/[0-9a-f]\{64\}' /proc/self/mountinfo 2>/dev/null | head -1)"
+  if [[ -n $id ]]; then printf '%s\n' "${id#containers/}"; else hostname; fi
+}
+
 # Dans un conteneur (devcontainer, Codespaces, CI) : rejoindre dba-net pour joindre pg et mongo1 par leur nom.
 attach_devcontainer() {
   [[ -f /.dockerenv ]] || return 0
   docker network inspect dba-net >/dev/null 2>&1 || return 0
   local me
-  me="$(hostname)"
+  me="$(self_container_id)"
   if docker inspect "$me" --format '{{json .NetworkSettings.Networks}}' | grep -q '"dba-net"'; then
     return 0
   fi

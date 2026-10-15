@@ -1,0 +1,2 @@
+# Fins de ligne LF partout : un clone Windows en CRLF casserait les shebangs et les fichiers sourcés par Bash.
+* text=auto eol=lf

@@ -76,3 +76,10 @@ check "mongosh mongo2 : connexion directe à un nœud" output_matches '^(true|fa
 check "doctor : vert sur cette machine" "$DB" doctor
 check "doctor : Docker injoignable, ✗ et code 1" expect_exit 1 env DOCKER_HOST=unix:///nonexistent "$DB" doctor
 check "status : en-tête du tableau en français, sans « <no value> »" bash -c "out=\"\$('$DB' status)\"; grep -q '^service *état *santé' <<<\"\$out\" && ! grep -q 'no value' <<<\"\$out\""
+
+# Le lendemain : down le soir, up le matin. rs0 doit avoir son primaire sans rebuild.
+check "down puis up : rs0 a un primaire, sans rebuild" bash -c "'$DB' down >/dev/null && '$DB' up >/dev/null && [[ \"\$(mongosh --quiet 'mongodb://mongo1:27017/?replicaSet=rs0&serverSelectionTimeoutMS=10000' --eval 'db.hello().isWritablePrimary')\" == true ]]"
+# Codespaces : le hostname n'est pas l'identifiant du conteneur ; celui-ci se lit dans mountinfo.
+if in_container; then
+  check "identifiant du devcontainer lu sans dépendre du hostname" bash -c "source '$DBA_ROOT/scripts/lib/common.sh'; source '$DBA_ROOT/scripts/lib/stack.sh'; [[ \"\$(self_container_id)\" == \"\$(docker inspect \"\$(hostname)\" --format '{{.Id}}')\" ]]"
+fi
