@@ -1,4 +1,5 @@
-# Outillage du cours : clients PostgreSQL 18 (PGDG) et MongoDB 8.0, de la même version majeure que les serveurs.
+# Outillage du cours : client PostgreSQL 18 (PGDG), de la même version majeure que le serveur, et outils MongoDB
+# (mongosh 2, database-tools 100) tirés du dépôt 8.0, compatibles avec le serveur 7.0 comme avec un futur 8.x.
 FROM mcr.microsoft.com/devcontainers/base:noble@sha256:21e9e3275736cb3bc33a2904b279a2ab292c51fedd53c2963463627d4586c3e6
 
 ARG PG_MAJOR=18

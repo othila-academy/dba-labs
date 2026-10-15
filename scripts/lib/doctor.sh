@@ -23,6 +23,13 @@ kernel_in_mongo_risk() {
   ((n >= 6019000 && n <= 7000013))
 }
 
+# La version majeure d'une image « nom:7.0.45@sha256:… » : 7 ; 0 si le tag n'en donne pas.
+image_major() {
+  local tag=${1%%@*}
+  tag=${tag##*:}
+  if [[ $tag =~ ^([0-9]+) ]]; then printf '%s\n' "${BASH_REMATCH[1]}"; else printf '0\n'; fi
+}
+
 # Le réglage de la mémoire n'est pas au même endroit sous macOS et sous Windows avec WSL2.
 memory_advice() {
   printf '%s' "macOS : Docker Desktop → Réglages → Resources → Memory, 4 Go ou plus ; Windows (WSL2) : dans %UserProfile%\\.wslconfig, section [wsl2], memory=4GB, puis wsl --shutdown et relance Docker Desktop"
@@ -63,8 +70,8 @@ cmd_doctor() {
   local arch
   arch="$(docker info --format '{{.Architecture}}' 2>/dev/null)"
   if [[ $arch == x86_64 ]]; then
-    if grep -qw avx /proc/cpuinfo 2>/dev/null; then doctor_line ok "processeur : AVX disponible (MongoDB 8)"; else
-      doctor_line ko "processeur sans AVX : MongoDB 8 ne démarre pas" "travaille sur GitHub Codespaces (docs/AVANT-LE-COURS.md)"
+    if grep -qw avx /proc/cpuinfo 2>/dev/null; then doctor_line ok "processeur : AVX disponible (MongoDB 5 et plus)"; else
+      doctor_line ko "processeur sans AVX : MongoDB 5 et plus ne démarre pas" "travaille sur GitHub Codespaces (docs/AVANT-LE-COURS.md)"
     fi
   else
     doctor_line ok "processeur : ${arch:-inconnu}"
@@ -72,7 +79,8 @@ cmd_doctor() {
 
   local kernel
   kernel="$(docker info --format '{{.KernelVersion}}' 2>/dev/null)"
-  if kernel_in_mongo_risk "$kernel"; then
+  # MongoDB 7 n'a pas l'allocateur en cause : l'alerte ne vaut qu'à partir de MongoDB 8.
+  if kernel_in_mongo_risk "$kernel" && (($(image_major "$DBA_MONGO_IMAGE") >= 8)); then
     doctor_line warn "noyau $kernel : MongoDB 8 y est sujet à des plantages au démarrage (SERVER-121912)" \
       "mets Docker Desktop à jour (noyau 7.0.14 ou plus récent) ; en attendant, préviens le formateur"
   else
