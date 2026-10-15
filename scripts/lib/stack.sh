@@ -18,6 +18,10 @@ cmd_down() {
   require_docker
   load_env
   all_profiles
+  # Détacher ce devcontainer du réseau, pour que Compose puisse le supprimer avec le reste.
+  if [[ -f /.dockerenv ]] && docker network inspect dba-net >/dev/null 2>&1; then
+    docker network disconnect -f dba-net "$(self_container_id)" >/dev/null 2>&1 || true
+  fi
   compose down -v --remove-orphans
   docker volume rm -f dba-config >/dev/null
   info "bases arrêtées, volumes supprimés"

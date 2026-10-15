@@ -36,11 +36,41 @@ load_env() {
   source "$DBA_ROOT/infra/images.env"
   # shellcheck source=/dev/null
   source "$DBA_ROOT/infra/.env.lab"
-  if [[ -f "$DBA_PROJECT/stack.env" ]]; then
-    # shellcheck source=/dev/null
-    source "$DBA_PROJECT/stack.env"
-  fi
   set +a
+  read_stack_env
+}
+
+# project/stack.env est un fichier de l'étudiant : on le lit, on ne l'exécute jamais.
+# Une seule clé, COMPOSE_PROFILES, et des profils séparés par des virgules.
+read_stack_env() {
+  local file="$DBA_PROJECT/stack.env" line key value n=0
+  COMPOSE_PROFILES=
+  [[ -f $file ]] || return 0
+  while IFS= read -r line || [[ -n $line ]]; do
+    n=$((n + 1))
+    line=${line%$'\r'}
+    [[ $line =~ ^[[:space:]]*(#|$) ]] && continue
+    [[ $line == *=* ]] || die "project/stack.env, ligne $n : « $line » n'est pas de la forme CLE=valeur"
+    key=${line%%=*}
+    value=${line#*=}
+    [[ $key == COMPOSE_PROFILES ]] || die "project/stack.env : $key n'est pas reconnu, seule la clé COMPOSE_PROFILES l'est"
+    [[ $value =~ ^[a-z0-9,-]*$ ]] || die "project/stack.env : COMPOSE_PROFILES=$value : sépare les profils par des virgules, sans espace (ex. COMPOSE_PROFILES=rs,legacy)"
+    COMPOSE_PROFILES=$value
+  done <"$file"
+  export COMPOSE_PROFILES
+}
+
+# Les commandes qui n'attendent aucun argument le disent, plutôt que d'ignorer ce qu'on leur donne.
+no_args() {
+  local command=$1
+  shift
+  [[ $# -eq 0 ]] || usage_error "$command n'attend pas d'argument (reçu : $*)"
+}
+
+# Docker, puis la base pg joignable par son nom depuis ce conteneur.
+require_stack() {
+  require_docker
+  getent hosts pg >/dev/null 2>&1 || die "les bases ne répondent pas : scripts/db up (ou scripts/db rebuild)"
 }
 
 compose() {
@@ -55,6 +85,11 @@ compose() {
 with_profiles() {
   local list="${COMPOSE_PROFILES:-}" known p
   known="$(COMPOSE_PROFILES='' compose config --profiles | paste -sd, -)"
+  local -a from_file=()
+  IFS=, read -ra from_file <<<"$list"
+  for p in "${from_file[@]}"; do
+    [[ -z $p || ",$known," == *",$p,"* ]] || die "profil inconnu : $p, dans project/stack.env (profils connus : ${known:-aucun})"
+  done
   for p in "$@"; do
     [[ ",$known," == *",$p,"* ]] || die "profil inconnu : $p (profils connus : ${known:-aucun})"
     [[ ",$list," == *",$p,"* ]] || list="${list:+$list,}$p"

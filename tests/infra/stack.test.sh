@@ -13,6 +13,9 @@ no_bind_mount() { ! docker inspect dba-pg-1 --format '{{range .Mounts}}{{.Type}}
 
 check "down : part d'une machine propre" "$DB" down
 check "up : démarre et attend la santé" "$DB" up
+check "healthcheck pg sur TCP (pas le socket du serveur d'initialisation)" output_matches '127\.0\.0\.1' docker inspect dba-pg-1 --format '{{json .Config.Healthcheck.Test}}'
+check "healthcheck mongo espacé (15 s), rapide au démarrage" equals "$(docker inspect dba-mongo1-1 --format '{{.Config.Healthcheck.Interval}} {{.Config.Healthcheck.StartInterval}}')" "15s 1s"
+check "psql : options sans rôle ni base" equals "$("$DB" psql -tAXc 'select 3')" 3
 check "psql -h pg répond depuis le devcontainer" equals "$(pg_sql postgres 'select 1')" 1
 check "PostgreSQL en version 18" output_matches '^18\.' pg_sql postgres 'show server_version'
 check "configuration copiée : shared_buffers = 256MB" pg_show shared_buffers 256MB
@@ -28,6 +31,7 @@ fi
 check "down : se termine sans erreur" "$DB" down
 check "down : plus aucun conteneur du projet" no_dba_containers
 check "down : plus aucun volume du projet, dba-config compris" no_dba_volumes
+check "down : le réseau dba-net est supprimé" expect_exit 1 docker network inspect dba-net
 check "down sur une stack arrêtée : code 0" "$DB" down
 
 # rebuild sur un projet de test : une copie de project/ avec deux fichiers SQL et un script Mongo.

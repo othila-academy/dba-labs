@@ -17,9 +17,14 @@ main() {
   case "$command" in
     '') usage_error "une commande est attendue" ;;
     help | -h | --help) info "$USAGE" ;;
-    up | down | rebuild | restart | status | psql | mongosh | attach | doctor)
+    up | restart | psql | mongosh | reload | incident)
       shift
       "cmd_$command" "$@"
+      ;;
+    down | rebuild | status | attach | doctor)
+      shift
+      no_args "$command" "$@"
+      "cmd_$command"
       ;;
     *) usage_error "commande inconnue : $command" ;;
   esac

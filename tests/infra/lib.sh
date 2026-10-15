@@ -7,7 +7,7 @@ trap 'rm -f "$TEST_OUT"' EXIT
 check() {
   local label=$1
   shift
-  if "$@" >"$TEST_OUT" 2>&1; then
+  if "$@" </dev/null >"$TEST_OUT" 2>&1; then
     printf '✓ %s\n' "$label"
     TESTS_PASSED=$((TESTS_PASSED + 1))
   else
