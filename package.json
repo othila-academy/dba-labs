@@ -1,0 +1,7 @@
+{
+  "name": "dba-labs",
+  "private": true,
+  "description": "Administration des bases de données, en labs othila-lab",
+  "scripts": { "lab": "lab" },
+  "devDependencies": { "@othila-academy/lab": "0.11.0" }
+}

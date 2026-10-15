@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Point d'entrée unique des bases du cours : scripts/db <commande>. scripts/db help pour la liste.
+set -euo pipefail
+export LC_COLLATE=C   # l'ordre lexical des fichiers de project/ ne dépend pas de la langue du poste
+
+DBA_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DBA_PROJECT="${DBA_PROJECT:-$DBA_ROOT/project}"
+export DBA_ROOT DBA_PROJECT
+
+for lib in "$DBA_ROOT"/scripts/lib/*.sh; do
+  # shellcheck source=/dev/null
+  source "$lib"
+done
+
+main() {
+  local command=${1:-}
+  case "$command" in
+    '') usage_error "une commande est attendue" ;;
+    help | -h | --help) info "$USAGE" ;;
+    up | down | rebuild | restart | status | psql | mongosh | attach | doctor)
+      shift
+      "cmd_$command" "$@"
+      ;;
+    *) usage_error "commande inconnue : $command" ;;
+  esac
+}
+
+main "$@"

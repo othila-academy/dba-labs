@@ -1,0 +1,18 @@
+{
+  "name": "dba-labs",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    "ghcr.io/devcontainers/features/node:2.1.1": { "version": "24" },
+    // Le démon Docker de l'hôte : scripts/db crée et recrée les bases à côté du devcontainer.
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1.10.1": { "moby": false }
+  },
+  "postCreateCommand": "npm ci && scripts/db rebuild",
+  // Après un redémarrage du devcontainer, le réseau des bases existe peut-être déjà : on s'y rattache.
+  "postStartCommand": "scripts/db attach",
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+  "customizations": {
+    "vscode": {
+      "extensions": ["mtxr.sqltools", "mtxr.sqltools-driver-pg", "mongodb.mongodb-vscode", "timonwong.shellcheck"]
+    }
+  }
+}

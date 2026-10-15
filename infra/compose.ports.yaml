@@ -1,0 +1,6 @@
+# Publication pour les outils graphiques de l'hôte, seulement avec DBA_PUBLISH_PORTS=1 ; jamais sur 0.0.0.0.
+services:
+  pg:
+    ports: ["127.0.0.1:15432:5432"]
+  mongo1:
+    ports: ["127.0.0.1:37017:27017"]
