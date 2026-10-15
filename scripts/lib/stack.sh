@@ -39,7 +39,24 @@ attach_devcontainer() {
   info "devcontainer rattaché au réseau dba-net"
 }
 
-cmd_status() { require_docker; }
+cmd_status() {
+  require_docker
+  load_env
+  all_profiles
+  attach_devcontainer
+  compose ps --format 'table {{.Service}}\t{{.State}}\t{{.Health}}'
+  local version
+  if version="$(run_psql postgres -tAc 'show server_version' 2>/dev/null)"; then
+    info "PostgreSQL $version"
+  else
+    info "PostgreSQL : injoignable (scripts/db up)"
+  fi
+  mongosh --quiet "mongodb://mongo1:27017/?directConnection=true" --eval '
+    print("MongoDB " + db.version());
+    try { rs.status().members.forEach((m) => print("  " + m.name + " · " + m.stateStr)); }
+    catch (e) { print("  rs0 non initialisé (scripts/db rebuild)"); }' 2>/dev/null \
+    || info "MongoDB : injoignable (scripts/db up)"
+}
 
 cmd_restart() {
   [[ $# -eq 1 ]] || usage_error "restart attend un service, par exemple : scripts/db restart pg"

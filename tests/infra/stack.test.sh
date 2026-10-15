@@ -66,3 +66,12 @@ check "profil inconnu : code 1" expect_exit 1 "$DB" up rss
 check "DBA_PUBLISH_PORTS=1 : pg publié sur 127.0.0.1:15432 seulement" bash -c "DBA_PUBLISH_PORTS=1 '$DB' up >/dev/null && [[ \"\$(docker port dba-pg-1 5432/tcp)\" == 127.0.0.1:15432 ]]"
 check "DBA_PUBLISH_PORTS=1 : mongo1 publié sur 127.0.0.1:37017 seulement" equals "$(docker port dba-mongo1-1 27017/tcp)" 127.0.0.1:37017
 check "sans DBA_PUBLISH_PORTS : la publication disparaît" bash -c "'$DB' up >/dev/null && [[ -z \"\$(docker port dba-pg-1)\" ]]"
+
+"$DB" up rs >/dev/null
+check "status : versions PostgreSQL et MongoDB" output_matches 'PostgreSQL 18\..*' "$DB" status
+check "status : rôle de chaque nœud" output_matches 'mongo1:27017 · PRIMARY' "$DB" status
+check "psql : une requête passe par le raccourci" equals "$("$DB" psql postgres postgres -tAXc 'select 2')" 2
+check "mongosh : le raccourci joint rs0" output_matches '^true$' "$DB" mongosh --eval 'db.hello().isWritablePrimary'
+check "mongosh mongo2 : connexion directe à un nœud" output_matches '^(true|false)$' "$DB" mongosh mongo2 --eval 'db.hello().isWritablePrimary'
+check "doctor : vert sur cette machine" "$DB" doctor
+check "doctor : Docker injoignable, ✗ et code 1" expect_exit 1 env DOCKER_HOST=unix:///nonexistent "$DB" doctor
