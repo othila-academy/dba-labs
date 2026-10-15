@@ -1,0 +1,31 @@
+# Scénario complet de la stack : à jouer dans le devcontainer, Docker de l'hôte requis.
+DB="$DBA_ROOT/scripts/db"
+# shellcheck source=/dev/null
+source "$DBA_ROOT/infra/.env.lab"
+
+pg_sql() { PGPASSWORD="$POSTGRES_PASSWORD" psql -h pg -U postgres -d "$1" -tAX -c "$2"; }
+equals() { [[ "$1" == "$2" ]] || { echo "« $1 », attendu « $2 »"; return 1; }; }
+pg_show() { equals "$(pg_sql postgres "show $1")" "$2"; }
+no_dba_containers() { [[ -z "$(docker ps -aq --filter label=com.docker.compose.project=dba)" ]]; }
+no_dba_volumes() { [[ -z "$(docker volume ls -q --filter name='^dba-')" ]]; }
+in_container() { [[ -f /.dockerenv ]]; }
+no_bind_mount() { ! docker inspect dba-pg-1 --format '{{range .Mounts}}{{.Type}} {{end}}' | grep -qw bind; }
+
+check "down : part d'une machine propre" "$DB" down
+check "up : démarre et attend la santé" "$DB" up
+check "psql -h pg répond depuis le devcontainer" equals "$(pg_sql postgres 'select 1')" 1
+check "PostgreSQL en version 18" output_matches '^18\.' pg_sql postgres 'show server_version'
+check "configuration copiée : shared_buffers = 256MB" pg_show shared_buffers 256MB
+check "pg_hba vient de project/ (copie dans dba-config)" pg_show hba_file /etc/dba/project/postgres/pg_hba.conf
+check "PGDATA dans le volume nommé" output_matches 'dba-pgdata' docker inspect dba-pg-1 --format '{{range .Mounts}}{{.Name}} {{.Destination}}{{"\n"}}{{end}}'
+check "aucun bind mount de project/" no_bind_mount
+check "aucun port publié par défaut" equals "$(docker port dba-pg-1)" ""
+check "idempotence : up une seconde fois" "$DB" up
+check "idempotence : attach deux fois" bash -c "'$DB' attach && '$DB' attach"
+if in_container; then
+  check "rattachement : détaché du réseau, up le rattache" bash -c "docker network disconnect dba-net \"\$(hostname)\" && '$DB' up && PGPASSWORD='$POSTGRES_PASSWORD' psql -h pg -U postgres -tAc 'select 1'"
+fi
+check "down : se termine sans erreur" "$DB" down
+check "down : plus aucun conteneur du projet" no_dba_containers
+check "down : plus aucun volume du projet, dba-config compris" no_dba_volumes
+check "down sur une stack arrêtée : code 0" "$DB" down
