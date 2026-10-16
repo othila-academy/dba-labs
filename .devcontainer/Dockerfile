@@ -17,3 +17,7 @@ RUN apt-get update \
  && apt-get update \
  && apt-get install -y --no-install-recommends "postgresql-client-${PG_MAJOR}" mongodb-mongosh mongodb-database-tools \
  && rm -rf /var/lib/apt/lists/*
+
+# Sur Docker Desktop, le dossier monté paraît parfois appartenir à un autre utilisateur juste après une écriture :
+# git refuserait alors le dépôt (« dubious ownership »). Le dépôt du cours est le seul que l'on monte ici.
+RUN git config --system --add safe.directory '*'
