@@ -1,0 +1,64 @@
+// Les aides communes des checks, contre la vraie stack (scripts/db up) et contre des hôtes injoignables.
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import {
+  DOWN, connectionMessage, expectRejected, inRollback, readEnv, withMongo, withPg
+} from '../../.othila-lab/shared/db.mjs';
+import { seqScansOn } from '../../.othila-lab/shared/plan.mjs';
+
+test('readEnv lit les identifiants de lab', () => {
+  assert.equal(readEnv('infra/.env.lab').POSTGRES_PASSWORD, 'valmorin-lab');
+});
+
+test('connectionMessage : une panne réseau donne le message unique', () => {
+  for (const code of ['ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED', '57P03']) {
+    assert.equal(connectionMessage({ code, message: '' }, {}), DOWN, code);
+  }
+  assert.equal(connectionMessage({ message: 'Connection terminated due to connection timeout' }, {}), DOWN);
+});
+
+test('connectionMessage : base absente, mot de passe refusé, autre erreur', () => {
+  assert.match(connectionMessage({ code: '3D000', message: '' }, { database: 'valmorin' }), /la base valmorin n'existe pas/);
+  assert.match(connectionMessage({ code: '28P01', message: '' }, { user: 'analyste' }), /^analyste ne se connecte pas/);
+  assert.equal(connectionMessage({ code: '42P01', message: '' }, {}), null);
+});
+
+test('withPg : un hôte injoignable donne DOWN, en moins de 6 s', async () => {
+  const started = Date.now();
+  await assert.rejects(withPg(async () => {}, { host: 'nope.invalid' }), { message: DOWN });
+  assert.ok(Date.now() - started < 6000);
+});
+
+test('withMongo : un hôte injoignable donne DOWN', async () => {
+  await assert.rejects(
+    withMongo(async () => {}, { uri: 'mongodb://nope.invalid:27017/?directConnection=true' }),
+    { message: DOWN }
+  );
+});
+
+test('inRollback ne laisse aucune trace', async () => {
+  await inRollback((c) => c.query('create table lab_trace (x int)'), { database: 'postgres' });
+  const { rows } = await withPg((c) => c.query("select to_regclass('lab_trace') as t"), { database: 'postgres' });
+  assert.equal(rows[0].t, null);
+});
+
+test('expectRejected : refus par une règle, acceptation, autre erreur', async () => {
+  await inRollback(async (c) => {
+    await c.query('create temp table r (x int check (x > 0))');
+    await expectRejected(c, 'insert into r values (-1)', 'un x négatif');
+    await assert.rejects(expectRejected(c, 'insert into r values (1)', 'un x positif'), /Constaté : elle l'accepte/);
+    await assert.rejects(expectRejected(c, 'insert into r (y) values (1)', 'une colonne inconnue'), /une autre erreur/);
+  }, { database: 'postgres' });
+});
+
+test('seqScansOn trouve un Seq Scan imbriqué, et seulement sur la table demandée', () => {
+  const plan = {
+    'Node Type': 'Hash Join',
+    Plans: [
+      { 'Node Type': 'Seq Scan', 'Relation Name': 'exemplaire' },
+      { 'Node Type': 'Hash', Plans: [{ 'Node Type': 'Seq Scan', 'Relation Name': 'emprunt' }] }
+    ]
+  };
+  assert.equal(seqScansOn(plan, 'emprunt').length, 1);
+  assert.equal(seqScansOn(plan, 'site').length, 0);
+});
