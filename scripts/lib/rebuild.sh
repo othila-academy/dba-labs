@@ -2,6 +2,9 @@
 
 cmd_rebuild() {
   local started=$SECONDS
+  # Lue par legacy_empty_hint (portée dynamique) : rebuild initialise lui-même le serveur hérité.
+  # shellcheck disable=SC2034
+  local DBA_IN_REBUILD=1
   step "1/9 · arrêt et suppression des volumes"
   cmd_down
   step "2/9 · démarrage des bases et de rs0"

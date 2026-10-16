@@ -42,6 +42,9 @@ check "règles : état dans la liste" equals "$(pg_sql valmorin "select count(*)
 check "règles : retour prévu après l'emprunt" equals "$(pg_sql valmorin 'select count(*) from emprunt where date_retour_prevue <= date_emprunt')" 0
 check "règles : retour jamais avant l'emprunt, jamais après le 15/10/2026" equals "$(pg_sql valmorin "select count(*) from emprunt where date_retour < date_emprunt or date_retour > date '2026-10-15'")" 0
 check "règles : des emprunts non rendus, entre 1 et 2 %" equals "$(pg_sql valmorin 'select count(*) filter (where date_retour is null) * 100 between count(*) and 2 * count(*) from emprunt')" t
+check "règles : aucun emprunt avant l'inscription de l'adhérent" equals "$(pg_sql valmorin 'select count(*) from emprunt e join adherent a on a.id = e.adherent_id where e.date_emprunt < a.date_inscription')" 0
+check "règles : au plus un emprunt en cours par exemplaire" equals "$(pg_sql valmorin 'select count(*) from (select exemplaire_id from emprunt where date_retour is null group by exemplaire_id having count(*) > 1) s')" 0
+check "contrat : homonymes, titres répétés et chevauchements annoncés" bash -c "grep -q 'homonymes' '$DBA_ROOT/infra/seed/CONTRAT.md' && grep -q 'même titre' '$DBA_ROOT/infra/seed/CONTRAT.md' && grep -q 'chevauch' '$DBA_ROOT/infra/seed/CONTRAT.md'"
 check "facultatifs : téléphone, ISBN, éditeur parfois absents" equals "$(pg_sql valmorin 'select bool_and(n > 0) from (select count(*) filter (where telephone is null) n from adherent union all select count(*) filter (where editeur is null) from ouvrage) s')" t
 # L'empreinte est prise avant toute écriture des tests (le test des séquences ajoute un adhérent).
 fingerprint() { pg_sql valmorin "select (select sum(hashtext(a::text)) from adherent a) + (select sum(hashtext(e::text)) from emprunt e) + (select sum(hashtext(x::text)) from exemplaire x) + (select sum(hashtext(o::text)) from ouvrage o)"; }
@@ -67,6 +70,12 @@ sed -i 's/email text,/email varchar(20),/' "$STRICT/project/schema/001_schema.sq
 check "seeds refusés par le schéma : la cause est citée, en français" output_matches 'varchar\(20\)|value too long|ne passent pas ton schéma' env DBA_PROJECT="$STRICT/project" "$DB" rebuild
 check "seeds refusés par le schéma : code 1" expect_exit 1 env DBA_PROJECT="$STRICT/project" "$DB" rebuild
 rm -rf "$STRICT"
+# Une règle naturelle de DBA, posée avant les données : les seeds doivent la respecter.
+UNIQ="$(mktemp -d)"
+cp -R "$SEEDED/project" "$UNIQ/project"
+echo 'create unique index un_emprunt_en_cours on emprunt (exemplaire_id) where date_retour is null;' >"$UNIQ/project/schema/002_regle.sql"
+check "seeds : passent un index unique « un seul emprunt en cours par exemplaire »" env DBA_PROJECT="$UNIQ/project" "$DB" rebuild
+rm -rf "$UNIQ"
 
 # Le dernier test de la tâche 4 laisse un rebuild en échec : on recharge le projet complet.
 DBA_PROJECT="$SEEDED/project" "$DB" rebuild >/dev/null

@@ -100,5 +100,8 @@ echo "shared_preload_libraries = 'pg_stat_statements'" >"$RELOAD/project/config/
 check "reload pg : un paramètre à redémarrage est signalé" output_matches 'shared_preload_libraries.*scripts/db restart pg' env DBA_PROJECT="$RELOAD/project" "$DB" reload pg
 check "reload sans service : code 2" expect_exit 2 "$DB" reload
 check "reload d'un service non PostgreSQL : message et code 1" output_matches '^erreur : reload ne sait recharger que pg' "$DB" reload mongo1
+echo "work_mem = '9XB'" >"$RELOAD/project/config/postgres/conf.d/70-faute.conf"
+check "reload pg : une valeur invalide est refusée, avec le fichier et le paramètre" output_matches '70-faute\.conf.*work_mem' env DBA_PROJECT="$RELOAD/project" "$DB" reload pg
+check "reload pg : une valeur invalide donne le code 1" expect_exit 1 env DBA_PROJECT="$RELOAD/project" "$DB" reload pg
 rm -rf "$RELOAD"
 "$DB" restart pg >/dev/null

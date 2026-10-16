@@ -1,6 +1,6 @@
 # Le serveur hérité
 
-L'ancien prestataire a laissé deux serveurs à la médiathèque : `pg-legacy` (PostgreSQL) et `mongo-legacy` (MongoDB). Ils tournent toujours, avec leur configuration d'origine, celle de ce dossier. Tu les démarres en ajoutant `legacy` à `project/stack.env` (`COMPOSE_PROFILES=legacy`, ou `rs,legacy`), puis `scripts/db up`.
+L'ancien prestataire a laissé deux serveurs à la médiathèque : `pg-legacy` (PostgreSQL) et `mongo-legacy` (MongoDB). Ils tournent toujours, avec leur configuration d'origine, celle de ce dossier. Tu les démarres en ajoutant `legacy` à `project/stack.env` (`COMPOSE_PROFILES=legacy`, ou `rs,legacy`), puis `scripts/db rebuild` : c'est lui qui recrée leur état d'origine (`up` seul les démarre vides).
 
 Ce que tu sais de leur configuration :
 

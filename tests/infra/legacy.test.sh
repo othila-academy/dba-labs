@@ -24,5 +24,40 @@ sed -i 's/"0.0.0.0:25432:5432"/"25432:5432"/' "$LEGACY/project/legacy/compose.ya
 check "legacy : un port sans IP est aussi ramené à 127.0.0.1" bash -c "DBA_PROJECT='$LEGACY/project' '$DB' up >/dev/null && [[ \"\$(docker port dba-pg-legacy-1 5432/tcp)\" == 127.0.0.1:25432 ]]"
 check "legacy : reload pg-legacy" run_legacy reload pg-legacy
 check "legacy : down retire aussi le serveur hérité" bash -c "DBA_PROJECT='$LEGACY/project' '$DB' down >/dev/null && [[ -z \"\$(docker ps -aq --filter name=dba-pg-legacy)\" ]]"
+# I2 : une clé privée doit arriver en 600 (PostgreSQL refuse une clé lisible par d'autres), le certificat reste lisible.
+set -a
+# shellcheck source=/dev/null
+source "$DBA_ROOT/infra/images.env"
+set +a
+touch "$LEGACY/project/legacy/postgres/server.key" "$LEGACY/project/legacy/postgres/server.crt"
+run_legacy up >/dev/null 2>&1
+check "legacy : clé privée copiée en 600, propriétaire 999" equals "$(docker run --rm -v dba-config:/cfg --entrypoint stat "$DBA_PG_IMAGE" -c '%a %u' /cfg/legacy/postgres/server.key)" "600 999"
+check "legacy : certificat copié en 644" equals "$(docker run --rm -v dba-config:/cfg --entrypoint stat "$DBA_PG_IMAGE" -c '%a %u' /cfg/legacy/postgres/server.crt)" "644 999"
+rm -f "$LEGACY/project/legacy/postgres/server.key" "$LEGACY/project/legacy/postgres/server.crt"
+
+# I4 : après un down, up laisse le serveur hérité vide ; il le dit et renvoie au rebuild.
+run_legacy down >/dev/null 2>&1
+check "legacy : up sur un serveur hérité vide renvoie à scripts/db rebuild" output_matches 'serveur hérité vide.*scripts/db rebuild' run_legacy up
+check "README du serveur hérité : démarrer par scripts/db rebuild" grep -q 'scripts/db rebuild' "$DBA_ROOT/project/legacy/README.md"
+
+# I1 : un service sans port déclaré, un port sans port hôte : la stack démarre quand même.
+printf 'services:\n  pg-legacy:\n    ports: ["5432"]\n' >"$LEGACY/project/legacy/compose.yaml"
+check "legacy : sans port pour mongo-legacy, sans port hôte pour pg-legacy : up démarre" run_legacy up
+check "legacy : mongo-legacy ne publie rien" equals "$(docker port dba-mongo-legacy-1)" ""
+check "legacy : pg-legacy sur un port éphémère de 127.0.0.1" output_matches '^127\.0\.0\.1:[0-9]+$' docker port dba-pg-legacy-1 5432/tcp
 rm -rf "$LEGACY"
+
+# I3 : un serveur hérité durci (scram, authentification Mongo) se reconstruit encore : l'initialisation passe
+# par le socket local du conteneur (pg) et par l'exception localhost (mongo).
+HARD="$(mktemp -d)"
+cp -R "$DBA_PROJECT" "$HARD/project"
+echo 'COMPOSE_PROFILES=legacy' >"$HARD/project/stack.env"
+printf 'local all postgres peer\nhost all all 0.0.0.0/0 scram-sha-256\nhost all all ::/0 scram-sha-256\n' >"$HARD/project/legacy/postgres/pg_hba.conf"
+printf "set password_encryption = 'scram-sha-256';\ncreate role app_mediatheque login password 'durci';\ncreate database mediatheque owner app_mediatheque;\n" >"$HARD/project/legacy/postgres/init.sql"
+printf 'security:\n  authorization: enabled\n' >>"$HARD/project/legacy/mongo/mongod.conf"
+printf "const admin = db.getSiblingDB('admin');\nadmin.createUser({ user: 'admin', pwd: 'durci', roles: ['root'] });\nadmin.auth('admin', 'durci');\ndb.getSiblingDB('mediatheque').prets.insertOne({ ok: 1 });\n" >"$HARD/project/legacy/mongo/init.js"
+check "legacy durci : rebuild va au bout" env DBA_PROJECT="$HARD/project" "$DB" rebuild
+check "legacy durci : sans mot de passe, l'application est refusée" expect_exit 2 psql -h pg-legacy -U app_mediatheque -d mediatheque -w -c 'select 1'
+check "legacy durci : sans identifiants, mongo-legacy ne liste pas ses bases" bash -c "! mongosh --quiet 'mongodb://mongo-legacy:27017/?directConnection=true' --eval 'db.adminCommand({ listDatabases: 1 })' >/dev/null 2>&1"
+rm -rf "$HARD"
 "$DB" rebuild >/dev/null

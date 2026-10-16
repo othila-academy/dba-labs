@@ -15,6 +15,7 @@ config_sync() {
         if [ -d /tmp/src/legacy ]; then cp -R /tmp/src/legacy /cfg/legacy; fi
         chown -R 999:999 /cfg
         find /cfg -type d -exec chmod 755 {} +
-        find /cfg -type f -exec chmod 644 {} +' \
+        find /cfg -type f -exec chmod 644 {} +
+        find /cfg -type f -name "*.key" -exec chmod 600 {} +' \
     || die "copie de la configuration de project/ impossible : vérifie project/config/postgres/"
 }

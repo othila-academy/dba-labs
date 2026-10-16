@@ -8,10 +8,11 @@ cmd_up() {
   config_sync
   info "démarrage des bases${COMPOSE_PROFILES:+ (profils : $COMPOSE_PROFILES)}…"
   compose up -d --wait --wait-timeout 120 \
-    || die "les bases ne sont pas prêtes après 120 s : scripts/db status, puis docker compose -p dba logs"
+    || die "les bases ne démarrent pas (message de Docker Compose ci-dessus) : scripts/db status, puis docker compose -p dba logs"
   attach_devcontainer
   # rs0 se réinitialise après un down (volumes neufs) : sans cela, MongoDB refuserait toute écriture.
   rs_init
+  legacy_empty_hint
   info "bases prêtes"
 }
 
@@ -115,8 +116,26 @@ cmd_reload() {
     sleep 0.1
   done
   pending="$("${sql[@]}" -c "select string_agg(name, ', ' order by name) from pg_settings where pending_restart")"
+  # pg_file_settings relit les fichiers : une valeur refusée y porte son erreur, avec le fichier et la ligne.
+  # Un paramètre qui attend un redémarrage y porte aussi une erreur : celui-là n'est pas une faute, on le signale plus bas.
+  local errors
+  errors="$("${sql[@]}" -c "select string_agg(coalesce(regexp_replace(sourcefile, '^.*/', ''), '?') || ':' || coalesce(sourceline::text, '?') || ' ' || coalesce(name, '') || ' : ' || error, '; ') from pg_file_settings where error is not null and name not in (select name from pg_settings where pending_restart)")"
+  if [[ -n $errors ]]; then
+    die "$1 a refusé une partie de sa configuration : $errors → corrige project/config, puis scripts/db reload $1"
+  fi
   info "$1 a relu sa configuration"
   if [[ -n $pending ]]; then
-    info "ces paramètres ne changeront qu'au redémarrage : $pending → scripts/db restart $1"
+    info "PostgreSQL attend un redémarrage pour : $pending → scripts/db restart $1 (même si tu viens de retirer le réglage : le redémarrage le confirmera)"
   fi
+}
+
+# Après un down, up recrée un serveur hérité vide : son état d'origine ne revient qu'avec rebuild. On le dit,
+# sauf pendant rebuild lui-même, qui l'initialise juste après.
+legacy_empty_hint() {
+  legacy_active || return 0
+  [[ -z ${DBA_IN_REBUILD:-} ]] || return 0
+  local roles
+  roles="$(compose exec -T -u postgres pg-legacy psql -qtAX -d postgres -c "select count(*) from pg_roles where rolname !~ '^pg_' and rolname <> 'postgres'" 2>/dev/null)"
+  [[ $roles == 0 ]] && info "serveur hérité vide (volumes neufs) : son état d'origine se recrée par scripts/db rebuild"
+  return 0
 }
