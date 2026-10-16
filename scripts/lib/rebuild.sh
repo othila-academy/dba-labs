@@ -2,22 +2,24 @@
 
 cmd_rebuild() {
   local started=$SECONDS
-  step "1/8 · arrêt et suppression des volumes"
+  step "1/9 · arrêt et suppression des volumes"
   cmd_down
-  step "2/8 · démarrage des bases et de rs0"
+  step "2/9 · démarrage des bases et de rs0"
   cmd_up
-  step "3/8 · schéma PostgreSQL (project/schema)"
+  step "3/9 · schéma PostgreSQL (project/schema)"
   apply_schema
-  step "4/8 · données de démonstration PostgreSQL"
+  step "4/9 · données de démonstration PostgreSQL"
   apply_pg_seeds
-  step "5/8 · après les données (project/post)"
+  step "5/9 · après les données (project/post)"
   apply_post
-  step "6/8 · statistiques (ANALYZE)"
+  step "6/9 · statistiques (ANALYZE)"
   analyze_all
-  step "7/8 · données de démonstration MongoDB"
+  step "7/9 · données de démonstration MongoDB"
   apply_mongo_seeds
-  step "8/8 · scripts MongoDB (project/mongo)"
+  step "8/9 · scripts MongoDB (project/mongo)"
   apply_mongo
+  step "9/9 · serveur hérité (project/legacy, si le profil legacy est actif)"
+  if legacy_active; then apply_legacy; else info "profil legacy inactif : rien à faire"; fi
   info ""
   info "bases reconstruites depuis project/ en $((SECONDS - started)) s"
 }

@@ -4,6 +4,7 @@ cmd_up() {
   require_docker
   load_env
   with_profiles "$@"
+  compose version >/dev/null
   config_sync
   info "démarrage des bases${COMPOSE_PROFILES:+ (profils : $COMPOSE_PROFILES)}…"
   compose up -d --wait --wait-timeout 120 \
@@ -18,6 +19,9 @@ cmd_down() {
   require_docker
   load_env
   all_profiles
+  # Lue par compose() (portée dynamique) ; local, car rebuild enchaîne down puis up, et up doit garder l'override.
+  # shellcheck disable=SC2034
+  local DBA_SKIP_LEGACY_PORTS=1
   # Détacher ce devcontainer du réseau, pour que Compose puisse le supprimer avec le reste.
   if [[ -f /.dockerenv ]] && docker network inspect dba-net >/dev/null 2>&1; then
     docker network disconnect -f dba-net "$(self_container_id)" >/dev/null 2>&1 || true
@@ -57,6 +61,9 @@ cmd_status() {
   require_docker
   load_env
   all_profiles
+  # Lue par compose() (portée dynamique) ; local, car rebuild enchaîne down puis up, et up doit garder l'override.
+  # shellcheck disable=SC2034
+  local DBA_SKIP_LEGACY_PORTS=1
   attach_devcontainer
   # En-tête à nous : Compose 5 laisse la colonne santé sans titre (« <no value> »).
   { printf 'service\tétat\tsanté\n'; compose ps --format '{{.Service}}\t{{.State}}\t{{.Health}}'; } | column -t -s $'\t'
@@ -78,6 +85,7 @@ cmd_restart() {
   require_docker
   load_env
   with_profiles
+  compose version >/dev/null
   local services
   services="$(compose config --services)"
   grep -qx -- "$1" <<<"$services" || die "service inconnu : $1 (services actifs : $(paste -sd' ' - <<<"$services"))"
@@ -95,6 +103,7 @@ cmd_reload() {
   require_stack
   load_env
   with_profiles
+  compose version >/dev/null
   config_sync
   local sql=(env PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$1" -U postgres -d postgres -qtAX)
   local before pending _

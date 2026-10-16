@@ -8,7 +8,7 @@ export DBA_ROOT DBA_PROJECT
 source "$DBA_ROOT/tests/infra/lib.sh"
 
 check "shellcheck : scripts et tests" shellcheck -x "$DBA_ROOT/scripts/db" "$DBA_ROOT"/scripts/lib/*.sh "$DBA_ROOT"/tests/infra/*.sh
-for file in tools cli doctor seed stack; do
+for file in tools cli doctor seed stack legacy; do
   [[ -f "$DBA_ROOT/tests/infra/$file.test.sh" ]] || continue
   printf '\n· %s\n' "$file"
   # shellcheck source=/dev/null

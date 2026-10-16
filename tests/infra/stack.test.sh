@@ -65,7 +65,7 @@ check "restart pg : réglage retiré, valeur par défaut" bash -c "'$DB' restart
 check "restart d'un service inconnu : message et code 1" output_matches '^erreur : service inconnu : pgg' "$DB" restart pgg
 
 check "up rs : mongo2 et mongo3 sains" bash -c "'$DB' up rs >/dev/null && [[ \"\$(docker inspect dba-mongo2-1 --format '{{.State.Health.Status}}')\" == healthy && \"\$(docker inspect dba-mongo3-1 --format '{{.State.Health.Status}}')\" == healthy ]]"
-check "profil inconnu : la liste des profils connus" output_matches 'profil inconnu : rss \(profils connus : rs\)' "$DB" up rss
+check "profil inconnu : la liste des profils connus" output_matches 'profil inconnu : rss \(profils connus : legacy,rs\)' "$DB" up rss
 check "profil inconnu : code 1" expect_exit 1 "$DB" up rss
 check "DBA_PUBLISH_PORTS=1 : pg publié sur 127.0.0.1:15432 seulement" bash -c "DBA_PUBLISH_PORTS=1 '$DB' up >/dev/null && [[ \"\$(docker port dba-pg-1 5432/tcp)\" == 127.0.0.1:15432 ]]"
 check "DBA_PUBLISH_PORTS=1 : mongo1 publié sur 127.0.0.1:37017 seulement" equals "$(docker port dba-mongo1-1 27017/tcp)" 127.0.0.1:37017

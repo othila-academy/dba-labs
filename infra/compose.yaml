@@ -44,11 +44,46 @@ services:
     profiles: [rs]
     volumes: [mongo3:/data/db]
 
+  pg-legacy:
+    image: ${DBA_PG_IMAGE:?infra/images.env}
+    profiles: [legacy]
+    command: ["postgres", "-c", "config_file=/etc/dba/legacy/postgres/postgresql.conf"]
+    env_file: .env.lab
+    restart: unless-stopped
+    networks: [dba-net]
+    volumes:
+      - pglegacy:/var/lib/postgresql
+      - dba-config:/etc/dba:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  mongo-legacy:
+    image: ${DBA_MONGO_IMAGE:?infra/images.env}
+    profiles: [legacy]
+    command: ["mongod", "--config", "/etc/dba/legacy/mongo/mongod.conf"]
+    restart: unless-stopped
+    networks: [dba-net]
+    volumes:
+      - mongolegacy:/data/db
+      - dba-config:/etc/dba:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+      start_interval: 1s
+
 volumes:
   pgdata: { name: dba-pgdata }
   mongo1: { name: dba-mongo1 }
   mongo2: { name: dba-mongo2 }
   mongo3: { name: dba-mongo3 }
+  pglegacy: { name: dba-pglegacy }
+  mongolegacy: { name: dba-mongolegacy }
   # Créé et rempli par scripts/db (config_sync) avant chaque démarrage, supprimé par scripts/db down.
   dba-config: { name: dba-config, external: true }
 

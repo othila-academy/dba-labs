@@ -3,7 +3,7 @@
 
 config_sync() {
   docker volume create dba-config >/dev/null
-  tar -cf - -C "$DBA_ROOT/infra" postgres -C "$DBA_PROJECT" config \
+  tar -cf - -C "$DBA_ROOT/infra" postgres -C "$DBA_PROJECT" config -C "$DBA_PROJECT" legacy \
     | docker run --rm -i --user 0 --entrypoint sh -v dba-config:/cfg "$DBA_PG_IMAGE" -euc '
         mkdir -p /tmp/src && tar -xf - -C /tmp/src
         rm -rf /cfg/postgres /cfg/project
@@ -11,6 +11,8 @@ config_sync() {
         cp /tmp/src/postgres/base.conf /cfg/postgres/postgresql.conf
         cp /tmp/src/postgres/pg_ident.conf /cfg/postgres/pg_ident.conf
         cp -R /tmp/src/config/postgres /cfg/project/postgres
+        rm -rf /cfg/legacy
+        if [ -d /tmp/src/legacy ]; then cp -R /tmp/src/legacy /cfg/legacy; fi
         chown -R 999:999 /cfg
         find /cfg -type d -exec chmod 755 {} +
         find /cfg -type f -exec chmod 644 {} +' \

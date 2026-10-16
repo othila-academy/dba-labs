@@ -79,6 +79,14 @@ compose() {
   if [[ "${DBA_PUBLISH_PORTS:-0}" == 1 ]]; then
     files+=(-f "$DBA_ROOT/infra/compose.ports.yaml")
   fi
+  if [[ -z ${DBA_SKIP_LEGACY_PORTS:-} ]] && legacy_active && [[ -f "$DBA_PROJECT/legacy/compose.yaml" ]]; then
+    # Une seule génération (et un seul avertissement) par commande, même si compose est appelé plusieurs fois.
+    if [[ -z ${DBA_LEGACY_OVERRIDE:-} ]]; then
+      DBA_LEGACY_OVERRIDE="$(legacy_ports_override)"
+      export DBA_LEGACY_OVERRIDE
+    fi
+    files+=(-f "$DBA_LEGACY_OVERRIDE")
+  fi
   docker compose --project-directory "$DBA_ROOT/infra" "${files[@]}" "$@"
 }
 
