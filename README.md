@@ -12,4 +12,4 @@ Le module « Administration des Bases de Données » (RNCP39611, BC01, 14 h) en 
 
 ## Les bases
 
-`scripts/db help` liste les commandes : `up`, `down`, `rebuild`, `restart`, `reload`, `status`, `psql`, `mongosh`, `doctor`. Tout l'état des bases vient de `project/` : `scripts/db rebuild` le reconstruit.
+`scripts/db help` liste les commandes : `up`, `down`, `rebuild`, `restart`, `reload`, `status`, `psql`, `mongosh`, `incident`, `doctor`. Tout l'état des bases vient de `project/` : `scripts/db rebuild` le reconstruit.

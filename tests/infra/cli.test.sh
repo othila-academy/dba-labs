@@ -33,3 +33,12 @@ echo 'DBA_AUTRE=1' >"$BADENV/project/stack.env"
 check "stack.env avec une autre clé : refusée" output_matches 'stack\.env : DBA_AUTRE.*seule la clé COMPOSE_PROFILES' env DBA_PROJECT="$BADENV/project" "$DB" status
 rm -rf "$BADENV"
 check "psql sans Docker : message français" output_matches 'Docker ne répond pas' env DOCKER_HOST=unix:///nonexistent "$DB" psql
+
+# incident : la panne d'un lab, décrite dans les définitions du cours.
+FIX_INCIDENTS="$DBA_ROOT/tests/infra/fixtures/incidents"
+check "aide : incident listé" output_matches 'incident \[nom\]' "$DB" help
+check "incident sans nom : code 2" expect_exit 2 env DBA_INCIDENTS="$FIX_INCIDENTS" "$DB" incident
+check "incident sans nom : la liste des incidents" output_matches 'incidents : essai, panne' env DBA_INCIDENTS="$FIX_INCIDENTS" "$DB" incident
+check "incident inconnu : message et code 1" output_matches '^erreur : incident inconnu : nope' env DBA_INCIDENTS="$FIX_INCIDENTS" "$DB" incident nope
+check "incident hors du dossier : refusé" expect_exit 1 env DBA_INCIDENTS="$FIX_INCIDENTS" "$DB" incident ../cli
+check "incident avec deux noms : code 2" expect_exit 2 env DBA_INCIDENTS="$FIX_INCIDENTS" "$DB" incident essai panne

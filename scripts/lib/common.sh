@@ -10,6 +10,7 @@ USAGE="usage : scripts/db <commande>
   status              état des services, versions, rôle de chaque nœud Mongo
   psql [rôle] [base]  se connecter à PostgreSQL (postgres sur la base postgres par défaut)
   mongosh [nœud]      se connecter à MongoDB (le replica set rs0 par défaut, ou un nœud : mongo2)
+  incident [nom]      injecte la panne d'un lab (sans nom : la liste des incidents)
   attach              rattache ce devcontainer au réseau des bases
   doctor              vérifie Docker, sa mémoire, le disque, le processeur et les images"
 

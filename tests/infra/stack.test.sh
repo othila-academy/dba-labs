@@ -13,6 +13,9 @@ no_bind_mount() { ! docker inspect dba-pg-1 --format '{{range .Mounts}}{{.Type}}
 
 check "down : part d'une machine propre" "$DB" down
 check "up : démarre et attend la santé" "$DB" up
+FIX_INCIDENTS="$DBA_ROOT/tests/infra/fixtures/incidents"
+check "incident : joué avec les fonctions et les identifiants de scripts/db" output_matches '14:02 — essai 42' bash -c "DBA_INCIDENTS='$FIX_INCIDENTS' '$DB' incident essai | paste -sd' ' -"
+check "incident en échec : code 1" expect_exit 1 env DBA_INCIDENTS="$FIX_INCIDENTS" "$DB" incident panne
 check "healthcheck pg sur TCP (pas le socket du serveur d'initialisation)" output_matches '127\.0\.0\.1' docker inspect dba-pg-1 --format '{{json .Config.Healthcheck.Test}}'
 check "healthcheck mongo espacé (15 s), rapide au démarrage" equals "$(docker inspect dba-mongo1-1 --format '{{.Config.Healthcheck.Interval}} {{.Config.Healthcheck.StartInterval}}')" "15s 1s"
 check "psql : options sans rôle ni base" equals "$("$DB" psql -tAXc 'select 3')" 3

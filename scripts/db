@@ -5,7 +5,8 @@ export LC_COLLATE=C   # l'ordre lexical des fichiers de project/ ne dépend pas 
 
 DBA_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DBA_PROJECT="${DBA_PROJECT:-$DBA_ROOT/project}"
-export DBA_ROOT DBA_PROJECT
+DBA_INCIDENTS="${DBA_INCIDENTS:-$DBA_ROOT/.othila-lab/incidents}"
+export DBA_ROOT DBA_PROJECT DBA_INCIDENTS
 
 for lib in "$DBA_ROOT"/scripts/lib/*.sh; do
   # shellcheck source=/dev/null

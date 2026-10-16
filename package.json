@@ -2,6 +2,12 @@
   "name": "dba-labs",
   "private": true,
   "description": "Administration des bases de données, en labs othila-lab",
-  "scripts": { "lab": "lab" },
-  "devDependencies": { "@othila-academy/lab": "0.11.0" }
+  "scripts": {
+    "lab": "lab"
+  },
+  "devDependencies": {
+    "@othila-academy/lab": "0.11.0",
+    "mongodb": "7.7.0",
+    "pg": "8.23.1"
+  }
 }
