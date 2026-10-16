@@ -1,5 +1,5 @@
 // Des lignes valides pour les checks, insérées dans la transaction (annulée) du check. Leurs valeurs ne croisent jamais
-// celles des données de démonstration : cartes VAL9…, codes-barres EX9…, ISBN 999…
+// celles des données de démonstration : cartes VAL9…, codes-barres EX9…, ISBN 979… (des ISBN-13 valides ; les données n'ont que des 978…)
 import { expectAccepted } from '../../shared/db.mjs';
 
 let n = 0;
@@ -27,7 +27,7 @@ export function ouvrageRow({ isbn, editeur = 'Seuil', titre = 'Le livre des chec
   const k = next();
   return {
     sql: 'insert into ouvrage (isbn, titre, annee, editeur) values ($1, $2, 2020, $3) returning id',
-    params: [isbn === undefined ? `999${pad(k, 10)}` : isbn, titre, editeur]
+    params: [isbn === undefined ? `979${pad(k, 10)}` : isbn, titre, editeur]
   };
 }
 

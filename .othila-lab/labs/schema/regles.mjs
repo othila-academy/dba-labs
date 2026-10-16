@@ -61,8 +61,8 @@ export const checks = [
     id: 'rejet-isbn-double',
     label: 'la base refuse un deuxième ouvrage avec un ISBN déjà pris',
     run: rejects('un deuxième ouvrage avec le même ISBN', async (client) => {
-      await expectAccepted(client, ouvrageRow({ isbn: '9990000000000' }), 'un ouvrage valide');
-      return ouvrageRow({ isbn: '9990000000000' });
+      await expectAccepted(client, ouvrageRow({ isbn: '9790000000000' }), 'un ouvrage valide');
+      return ouvrageRow({ isbn: '9790000000000' });
     })
   },
   {

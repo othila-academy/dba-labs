@@ -31,4 +31,7 @@ check "schema : le message nomme la colonne" matches "$(failure_of schema regles
 fresh_schema "$SOLUTION" 'alter table exemplaire drop constraint exemplaire_etat_check'
 check "schema : état libre → seul rejet-etat-inconnu échoue" equals "$(failed_ids schema regles)" "rejet-etat-inconnu"
 
+fresh_schema "$SOLUTION" "alter table ouvrage add check (isbn ~ '^97[89][0-9]{10}\$')"
+check "schema : une règle de format ISBN-13 (978 ou 979) → les règles passent encore" equals "$(failed_ids schema regles)" ""
+
 check "schema : rebuild remet la solution" "$DB" rebuild

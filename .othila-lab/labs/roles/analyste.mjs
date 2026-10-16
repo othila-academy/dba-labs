@@ -3,10 +3,11 @@ import { as } from '../../shared/valmorin.mjs';
 
 export const title = 'La lecture analytique';
 export const instructions = `Crée le rôle analyste (mot de passe de lab analyste-lab), pour le service culturel. Il lit tout le
-catalogue, l'historique des prêts et les adhérents, mais jamais leurs coordonnées (email, téléphone) ; il n'écrit rien.
+catalogue, l'historique des prêts et les adhérents, mais jamais leurs coordonnées (email, téléphone) : donne-lui des
+privilèges sur les colonnes de adherent. Il n'écrit rien.
 Puis scripts/db rebuild, connecte-toi avec lui (psql -h pg -U analyste -d valmorin) et essaie select * from adherent.
 
-À expliquer (npx lab submit roles analyste) : privilèges par colonne, ou vue sans email ni téléphone : laquelle choisirais-tu pour ce service, et pourquoi ?`;
+À expliquer (npx lab submit roles analyste) : qu'aurait changé une vue sans email ni téléphone, à la place des privilèges par colonne ?`;
 
 export const prediction = {
   promptId: 'roles-select-etoile',

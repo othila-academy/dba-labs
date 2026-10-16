@@ -25,4 +25,15 @@ check "sauvegarde : restauration complète → le check parle des adhérents per
 touch "$DBA_ROOT/backups/valmorin-29991231-235959.dump"
 check "sauvegarde : un dump illisible → dump-valide le dit" matches "$(failure_of sauvegarde sauvegarder dump-valide)" 'lisible par pg_restore'
 rm -f "$DBA_ROOT/backups/valmorin-29991231-235959.dump"
+
+# Une base qui a bougé avant la sauvegarde (un emprunt de plus, saisi à la main) : la restauration ciblée reste reconnue.
+pg_sql valmorin "insert into emprunt (exemplaire_id, adherent_id, date_emprunt, date_retour_prevue, date_retour)
+  select (select min(id) from exemplaire), (select min(id) from adherent), date '2026-10-01', date '2026-10-22', date '2026-10-10'" >/dev/null
+moved_dump="$(cd "$DBA_ROOT" && project/ops/backup.sh | tail -1)"
+"$DB" incident sauvegarde >/dev/null
+(cd "$DBA_ROOT" && project/runbooks/sauvegarde.sh >/dev/null)
+check "sauvegarde : un emprunt de plus avant la sauvegarde → la restauration ciblée passe" equals "$(failed_ids sauvegarde restaurer)" ""
+rm -f "$DBA_ROOT/$moved_dump"
+
 check "sauvegarde : rebuild remet la solution" "$DB" rebuild
+check "sauvegarde : après un rebuild, le check renvoie à l'incident" matches "$(failure_of sauvegarde restaurer emprunt-restauree)" 'scripts/db rebuild.*scripts/db incident sauvegarde'

@@ -20,7 +20,8 @@ export const prediction = {
   expected: 'non'
 };
 
-const EMPRUNTS = 2000000;
+// Les emprunts des données de démonstration ; un dump fait après quelques essais à la main en a un peu plus ou un peu moins.
+const EMPRUNTS_MIN = 1900000;
 // Les cartes des adhérents inscrits par l'incident (.othila-lab/incidents/sauvegarde.sh).
 const NOUVEAUX = ['VAL050001', 'VAL050012'];
 
@@ -33,7 +34,7 @@ export const checks = [
         const { rows: [table] } = await client.query("select to_regclass('public.emprunt') is not null as present");
         assert(table.present, 'Attendu : la table emprunt. Constaté : absente. pg_restore -l liste ce que contient ton dump.');
         const { rows: [count] } = await client.query('select count(*)::int as n from emprunt');
-        assert(count.n === EMPRUNTS, `Attendu : ${EMPRUNTS} emprunts, ceux du dump. Constaté : ${count.n}. Les données ont-elles été restaurées ?`);
+        assert(count.n >= EMPRUNTS_MIN, `Attendu : les emprunts du dump (2 millions environ). Constaté : ${count.n}. Les données ont-elles été restaurées ?`);
         const { rows: keys } = await client.query(
           "select contype, confrelid::regclass::text as ref from pg_constraint where conrelid = 'public.emprunt'::regclass and contype in ('p', 'f')"
         );
@@ -46,7 +47,7 @@ export const checks = [
         const { rows: [nouveaux] } = await client.query('select count(*)::int as n from adherent where numero_carte between $1 and $2', NOUVEAUX);
         assert(
           nouveaux.n === 12,
-          `Attendu : les 12 adhérents inscrits depuis la sauvegarde (cartes ${NOUVEAUX.join(' à ')}). Constaté : ${nouveaux.n}. Une restauration complète remet toute la base dans l'état du dump.`
+          `Attendu : les 12 adhérents inscrits depuis la sauvegarde (cartes ${NOUVEAUX.join(' à ')}). Constaté : ${nouveaux.n}. Une restauration complète remet toute la base dans l'état du dump ; un scripts/db rebuild aussi : relance alors scripts/db incident sauvegarde, puis ta restauration.`
         );
       })
   },

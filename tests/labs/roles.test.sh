@@ -1,5 +1,7 @@
 # shellcheck shell=bash
 # Lab roles : la solution passe ; les checks ne laissent aucune trace ; un privilège de trop fait échouer son check.
+instructions_of() { (cd "$DBA_ROOT" && node -e "import('./.othila-lab/labs/$1.mjs').then((m) => process.stdout.write(m.instructions))"); }
+check "roles : la consigne d'analyste impose des privilèges sur les colonnes de adherent" matches "$(instructions_of roles/analyste)" 'privilèges sur les colonnes de adherent'
 check "roles : tout passe sur la solution" equals "$(failed_ids roles)" ""
 before="$(pg_sql valmorin 'select count(*) from emprunt')"
 check "roles : deux lab check de suite, même résultat" equals "$(failed_ids roles)" ""

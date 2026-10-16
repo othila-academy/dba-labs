@@ -14,6 +14,7 @@ ${Q2};
 
 Lis leur plan avec explain (analyze, buffers) : quel nœud lit le plus de pages, et combien de lignes garde-t-il ? Pose dans
 project/post/020_perf.sql l'index qui convient à chacune, puis scripts/db rebuild (qui refait ANALYZE), et relis les plans.
+Si ton schéma pose déjà un index sur emprunt (au lab schema), regarde s'il sert Q1 ou Q2, et dis-le dans ton explication.
 
 À expliquer (npx lab submit requete-lente indexer) : pour Q2, pourquoi l'index déjà posé sur date_retour_prevue ne sert-il à rien, et que fait de mieux le tien ?`;
 

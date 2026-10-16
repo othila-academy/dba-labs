@@ -4,6 +4,7 @@
 query_of() { (cd "$DBA_ROOT" && node -e "import('./.othila-lab/labs/requete-lente/requetes.mjs').then((m) => process.stdout.write(m.$1))"); }
 Q1="$(query_of Q1)"
 Q2="$(query_of Q2)"
+check "requete-lente : la consigne parle des index que le schéma de l'étudiant aurait déjà posés" matches "$(cd "$DBA_ROOT" && node -e "import('./.othila-lab/labs/requete-lente/indexer.mjs').then((m) => process.stdout.write(m.instructions))")" '[Ss]i ton schéma pose déjà un index sur emprunt'
 check "requete-lente : tout passe sur la solution" equals "$(failed_ids requete-lente)" ""
 check "requete-lente : application.sql se joue" "$DB" psql postgres valmorin -f "$DBA_ROOT/.othila-lab/labs/requete-lente/application.sql"
 check "requete-lente : pg_stat_statements a compté Q2 trois fois au moins" test "$(pg_sql valmorin "select coalesce(sum(calls), 0) from pg_stat_statements where query like '%date_retour_prevue <%'")" -ge 3
