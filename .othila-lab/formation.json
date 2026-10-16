@@ -1,0 +1,7 @@
+{
+  "id": "dba",
+  "title": "Administration des bases de données",
+  "lab": "0.11.0",
+  "prepare": "scripts/db rebuild",
+  "seances": []
+}
