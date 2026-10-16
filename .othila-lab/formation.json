@@ -15,7 +15,8 @@
     {
       "title": "Jour 1 · après-midi — Sauvegarde et performances",
       "labs": [
-        "sauvegarde"
+        "sauvegarde",
+        "requete-lente"
       ]
     }
   ]

@@ -1,10 +1,12 @@
 // Les aides communes des checks, contre la vraie stack (scripts/db up) et contre des hôtes injoignables.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import {
   DOWN, connectionMessage, expectRejected, inRollback, readEnv, withMongo, withPg
 } from '../../.othila-lab/shared/db.mjs';
 import { seqScansOn } from '../../.othila-lab/shared/plan.mjs';
+import { Q1, Q2 } from '../../.othila-lab/labs/requete-lente/requetes.mjs';
 
 test('readEnv lit les identifiants de lab', () => {
   assert.equal(readEnv('infra/.env.lab').POSTGRES_PASSWORD, 'valmorin-lab');
@@ -61,4 +63,10 @@ test('seqScansOn trouve un Seq Scan imbriqué, et seulement sur la table demand�
   };
   assert.equal(seqScansOn(plan, 'emprunt').length, 1);
   assert.equal(seqScansOn(plan, 'site').length, 0);
+});
+
+test('application.sql joue mot pour mot Q1 et Q2', () => {
+  const sql = readFileSync(new URL('../../.othila-lab/labs/requete-lente/application.sql', import.meta.url), 'utf8');
+  assert.ok(sql.includes(`${Q1};`), 'Q1');
+  assert.ok(sql.includes(`${Q2};`), 'Q2');
 });
