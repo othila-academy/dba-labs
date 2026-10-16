@@ -1,4 +1,6 @@
 # Les phases de rebuild et les données de démonstration, sur des copies de project/.
+# Les requêtes MongoDB contiennent des opérateurs $ que le shell ne doit pas développer.
+# shellcheck disable=SC2016
 DB="$DBA_ROOT/scripts/db"
 # shellcheck source=/dev/null
 source "$DBA_ROOT/infra/.env.lab"
@@ -65,3 +67,19 @@ sed -i 's/email text,/email varchar(20),/' "$STRICT/project/schema/001_schema.sq
 check "seeds refusés par le schéma : la cause est citée, en français" output_matches 'varchar\(20\)|value too long|ne passent pas ton schéma' env DBA_PROJECT="$STRICT/project" "$DB" rebuild
 check "seeds refusés par le schéma : code 1" expect_exit 1 env DBA_PROJECT="$STRICT/project" "$DB" rebuild
 rm -rf "$STRICT"
+
+# Le dernier test de la tâche 4 laisse un rebuild en échec : on recharge le projet complet.
+DBA_PROJECT="$SEEDED/project" "$DB" rebuild >/dev/null
+mongo_eval() { mongosh --quiet "mongodb://mongo1:27017/valmorin?replicaSet=rs0" --eval "$1"; }
+check "mongo : 100 000 notices brutes" equals "$(mongo_eval 'db.notices_brutes.countDocuments()')" 100000
+check "mongo : 300 000 avis bruts" equals "$(mongo_eval 'db.avis_bruts.countDocuments()')" 300000
+check "mongo : quatre types de notices" equals "$(mongo_eval 'db.notices_brutes.distinct("type").sort().join(",")')" "dvd,jeu,livre,revue"
+check "mongo : notices hétérogènes (titre ou nom, tags ou mots_cles)" equals "$(mongo_eval 'db.notices_brutes.countDocuments({ titre: { $exists: false }, nom: { $exists: true } }) > 0 && db.notices_brutes.countDocuments({ mots_cles: { $exists: true } }) > 0')" true
+check "mongo : des années en texte, à convertir" equals "$(mongo_eval 'db.notices_brutes.countDocuments({ annee: { $type: "string" } }) > 0')" true
+check "mongo : chaque avis vise une notice existante" equals "$(mongo_eval 'db.avis_bruts.countDocuments({ notice_id: { $lt: 1 } }) + db.avis_bruts.countDocuments({ notice_id: { $gt: 100000 } })')" 0
+check "mongo : index de jointure sur avis_bruts" equals "$(mongo_eval 'db.avis_bruts.getIndexes().some((i) => JSON.stringify(i.key) === JSON.stringify({ notice_id: 1, date: -1 }))')" true
+mongo_fingerprint() { mongo_eval 'const a = db.avis_bruts.aggregate([{ $group: { _id: null, s: { $sum: "$note" } } }]).toArray()[0].s; const n = db.notices_brutes.findOne({ _id: 4242 }); a + "|" + JSON.stringify(n)'; }
+first_mongo="$(mongo_fingerprint)"
+DBA_PROJECT="$SEEDED/project" "$DB" rebuild >/dev/null
+check "mongo : déterminisme, deux rebuild, même empreinte" equals "$(mongo_fingerprint)" "$first_mongo"
+rm -rf "$SEEDED"

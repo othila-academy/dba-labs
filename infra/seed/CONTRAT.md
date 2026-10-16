@@ -30,4 +30,20 @@ Les données du fil rouge (le réseau de médiathèques de Valmorin) se chargent
 
 ## MongoDB (base `valmorin`)
 
-Voir la section ajoutée à la tâche 5.
+Deux collections brutes, telles que les anciens logiciels les ont exportées :
+
+| Collection | Contenu |
+|---|---|
+| `notices_brutes` | 100 000 notices, `_id` de 1 à 100 000, `type` parmi `livre`, `dvd`, `jeu`, `revue` |
+| `avis_bruts` | 300 000 avis : `notice_id`, `note` (1 à 5), `date`, `texte`, `auteur` |
+
+Les notices ne se ressemblent pas d'un type à l'autre :
+
+| Type | Titre | Auteurs | Année | Mots-clés |
+|---|---|---|---|---|
+| `livre` | `titre` | `auteurs` : liste de `{ nom, prenom }` | `annee`, un entier **ou parfois un texte** (`"1987"`) | `tags` |
+| `dvd` | `titre` | `realisateur` : un texte | `annee` | `tags` |
+| `jeu` | **`nom`** | — (un `editeur`) | `annee` | **`mots_cles`** |
+| `revue` | `titre` | — | **aucune** : une date `parution` | `tags` |
+
+Un index `{ notice_id: 1, date: -1 }` existe sur `avis_bruts`.
