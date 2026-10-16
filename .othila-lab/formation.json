@@ -3,5 +3,12 @@
   "title": "Administration des bases de données",
   "lab": "0.11.0",
   "prepare": "scripts/db rebuild",
-  "seances": []
+  "seances": [
+    {
+      "title": "Jour 1 · matin — Prise en main, schéma et rôles",
+      "labs": [
+        "demarrage"
+      ]
+    }
+  ]
 }
