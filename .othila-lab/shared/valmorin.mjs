@@ -22,3 +22,11 @@ export const FOREIGN_KEYS = [
   ['emprunt', 'exemplaire_id', 'exemplaire'],
   ['emprunt', 'adherent_id', 'adherent']
 ];
+
+// Les rôles du lab roles et leurs mots de passe de lab, imposés par la fiche (jamais en production).
+export const PASSWORDS = { dba_valmorin: 'dba-valmorin-lab', app_valmorin: 'app-valmorin-lab', analyste: 'analyste-lab' };
+export const as = (user) => ({ user, password: PASSWORDS[user] });
+// Un emprunt rendu, sur le premier exemplaire et le premier adhérent : valide pour toute solution conforme du lab schema.
+export const EMPRUNT_RENDU = `insert into emprunt (exemplaire_id, adherent_id, date_emprunt, date_retour_prevue, date_retour)
+  select (select min(id) from exemplaire), (select min(id) from adherent), date '2026-10-01', date '2026-10-22', date '2026-10-10'
+  returning id`;
