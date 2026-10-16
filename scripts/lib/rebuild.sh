@@ -46,7 +46,8 @@ apply_pg_seeds() {
   fi
   for file in "$DBA_ROOT"/infra/seed/postgres/*.sql; do
     info "  $(basename "$file")"
-    run_psql valmorin -1 -f "$file" \
+    # Les résultats des select (setseed, setval) n'intéressent personne ; les erreurs, elles, restent affichées.
+    run_psql valmorin -1 -f "$file" >/dev/null \
       || die "les données de démonstration ne passent pas ton schéma ($(basename "$file")) : lis la contrainte citée ci-dessus, compare-la au dictionnaire de données (infra/seed/CONTRAT.md), corrige project/schema, puis scripts/db rebuild"
   done
 }
