@@ -6,11 +6,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import {
-  DOWN, connectionMessage, expectRejected, inRollback, readEnv, withMongo, withPg
+  DOWN, connectionMessage, expectRejected, inAbortedTransaction, inRollback, readEnv, withMongo, withPg
 } from '../../.othila-lab/shared/db.mjs';
 import { seqScansOn } from '../../.othila-lab/shared/plan.mjs';
 import { gitStatusOf, latestFile, missingSections } from '../../.othila-lab/shared/fichiers.mjs';
 import { Q1, Q2 } from '../../.othila-lab/labs/requete-lente/requetes.mjs';
+import { Q1 as MQ1, Q2 as MQ2, stagesOf } from '../../.othila-lab/labs/modele-document/requetes.mjs';
 
 test('readEnv lit les identifiants de lab', () => {
   assert.equal(readEnv('infra/.env.lab').POSTGRES_PASSWORD, 'valmorin-lab');
@@ -100,4 +101,26 @@ test('gitStatusOf : suivi, ignoré, visible', () => {
   assert.equal(gitStatusOf(dir, 'b.txt'), 'visible');
   execFileSync('git', ['-C', dir, 'add', '-f', 'a.key']);
   assert.equal(gitStatusOf(dir, 'a.key'), 'suivi');
+});
+
+test('stagesOf : les étapes à toute profondeur, plan classique ou queryPlan', () => {
+  const plan = { stage: 'LIMIT', inputStage: { stage: 'FETCH', inputStage: { stage: 'IXSCAN' } } };
+  assert.deepEqual(stagesOf(plan), ['LIMIT', 'FETCH', 'IXSCAN']);
+  assert.deepEqual(stagesOf({ queryPlan: { stage: 'SORT', inputStage: { stage: 'COLLSCAN' } }, slotBasedPlan: { stages: '…' } }), ['SORT', 'COLLSCAN']);
+});
+
+test('application.js joue mot pour mot Q1 et Q2 du lab modele-document', () => {
+  const js = readFileSync(new URL('../../.othila-lab/labs/modele-document/application.js', import.meta.url), 'utf8');
+  assert.ok(js.includes("find({ type: 'livre', tags: 'policier' }).sort({ note_moyenne: -1 }).limit(10)"), 'Q1');
+  assert.ok(js.includes("find({ auteurs: 'Claire Faure' }).sort({ annee: -1 })"), 'Q2');
+  assert.deepEqual(MQ1, { filter: { type: 'livre', tags: 'policier' }, sort: { note_moyenne: -1 }, limit: 10 });
+  assert.deepEqual(MQ2, { filter: { auteurs: 'Claire Faure' }, sort: { annee: -1 } });
+});
+
+test('inAbortedTransaction ne laisse aucune trace', async () => {
+  await withMongo(async (client) => {
+    const notices = client.db('valmorin').collection('notices_brutes');
+    await inAbortedTransaction(client, (session) => notices.insertOne({ _id: 0, type: 'trace' }, { session }));
+    assert.equal(await notices.countDocuments({ _id: 0 }), 0);
+  }, { uri: 'mongodb://mongo1:27017/?replicaSet=rs0' });
 });
