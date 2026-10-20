@@ -1,6 +1,4 @@
-# Les ports publiés par le serveur hérité, tels que l'ancien prestataire les a déclarés.
+# Aucun port publié : pg-legacy et mongo-legacy ne sont joignables que depuis le réseau dba-net.
 services:
-  pg-legacy:
-    ports: ["0.0.0.0:25432:5432"]
-  mongo-legacy:
-    ports: ["0.0.0.0:27018:27017"]
+  pg-legacy: {}
+  mongo-legacy: {}

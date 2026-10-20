@@ -1,0 +1,4 @@
+# Les clés et les certificats ne vont jamais dans git : gen-cert.sh les régénère (scripts/db le lance avant le serveur hérité).
+*.key
+*.pem
+*.crt
