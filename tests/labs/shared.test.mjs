@@ -12,6 +12,7 @@ import { seqScansOn } from '../../.othila-lab/shared/plan.mjs';
 import { gitStatusOf, latestFile, missingSections } from '../../.othila-lab/shared/fichiers.mjs';
 import { Q1, Q2 } from '../../.othila-lab/labs/requete-lente/requetes.mjs';
 import { Q1 as MQ1, Q2 as MQ2, stagesOf } from '../../.othila-lab/labs/modele-document/requetes.mjs';
+import { parseMongoUri } from '../../.othila-lab/labs/replica-set/rs.mjs';
 
 test('readEnv lit les identifiants de lab', () => {
   assert.equal(readEnv('infra/.env.lab').POSTGRES_PASSWORD, 'valmorin-lab');
@@ -123,4 +124,13 @@ test('inAbortedTransaction ne laisse aucune trace', async () => {
     await inAbortedTransaction(client, (session) => notices.insertOne({ _id: 0, type: 'trace' }, { session }));
     assert.equal(await notices.countDocuments({ _id: 0 }), 0);
   }, { uri: 'mongodb://mongo1:27017/?replicaSet=rs0' });
+});
+
+test('parseMongoUri : plusieurs hôtes, port par défaut, options ; autre chose → null', () => {
+  const p = parseMongoUri('mongodb://mongo1:27017,mongo2,mongo3:27017/valmorin?replicaSet=rs0&w=majority');
+  assert.deepEqual(p.hosts, ['mongo1:27017', 'mongo2:27017', 'mongo3:27017']);
+  assert.equal(p.options.get('replicaSet'), 'rs0');
+  assert.deepEqual(parseMongoUri('mongodb://u:p@mongo1/').hosts, ['mongo1:27017']);
+  assert.equal(parseMongoUri('mongodb+srv://cluster.example/'), null);
+  assert.equal(parseMongoUri(undefined), null);
 });
