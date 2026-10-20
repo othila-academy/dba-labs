@@ -5,7 +5,7 @@
 rs3() { mongosh --quiet "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/valmorin?replicaSet=rs0&serverSelectionTimeoutMS=15000" --eval "$1"; }
 "$DB" rebuild >/dev/null
 check "replica-set : après rebuild, rs0 et la chaîne de l'application passent" equals "$(failed_ids replica-set repliquer)$(failed_ids replica-set connecter)" ""
-check "replica-set : après rebuild, le term est 1 et la bascule reste à faire" equals "$(rs3 'rs.status().term') $(failed_ids replica-set basculer)" "1 bascule-observee"
+check "replica-set : après rebuild, le term est 1 et la bascule reste à faire" equals "$(rs3 'Number(rs.status().term)') $(failed_ids replica-set basculer)" "1 bascule-observee"
 project_before="$(git -C "$DBA_ROOT" status --porcelain -- project)"
 check "incident : il raconte la panne du primaire" output_matches 'mongo1, le nœud primaire de rs0, ne répond plus' "$DB" incident primaire
 check "incident : mongo1 est arrêté" equals "$(docker inspect dba-mongo1-1 --format '{{.State.Status}}')" exited
