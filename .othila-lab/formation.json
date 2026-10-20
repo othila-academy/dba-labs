@@ -18,6 +18,12 @@
         "sauvegarde",
         "requete-lente"
       ]
+    },
+    {
+      "title": "Jour 2 · matin — Incident et modèle document",
+      "labs": [
+        "incident-verrou"
+      ]
     }
   ]
 }
