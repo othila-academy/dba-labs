@@ -21,3 +21,4 @@ failure_of() { lab_json "$1" "$2" | jq -r --arg id "$3" '.results[].failed[] | s
 pg_sql() { PGPASSWORD="$POSTGRES_PASSWORD" psql -h pg -U postgres -d "$1" -v ON_ERROR_STOP=1 -qtAX -c "$2"; }
 equals() { [[ "$1" == "$2" ]] || { echo "« $1 », attendu « $2 »"; return 1; }; }
 matches() { grep -Eq -- "$2" <<<"$1" || { printf '« %s »\nmotif attendu : %s\n' "$1" "$2"; return 1; }; }
+mongo_eval() { mongosh --quiet "mongodb://mongo1:27017/valmorin?replicaSet=rs0" --eval "$1"; }

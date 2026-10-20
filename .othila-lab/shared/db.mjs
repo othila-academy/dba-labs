@@ -139,3 +139,15 @@ export async function withMongo(fn, { uri = 'mongodb://mongo1:27017/?directConne
     await client.close().catch(() => {});
   }
 }
+
+// fn joue dans une transaction MongoDB toujours annulée : le check ne laisse aucune trace (rs0 est un replica set).
+export async function inAbortedTransaction(client, fn) {
+  const session = client.startSession();
+  session.startTransaction();
+  try {
+    return await fn(session);
+  } finally {
+    await session.abortTransaction().catch(() => {});
+    await session.endSession().catch(() => {});
+  }
+}
