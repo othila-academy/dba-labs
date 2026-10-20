@@ -29,7 +29,8 @@
     {
       "title": "Jour 2 · après-midi — Réplication et durcissement",
       "labs": [
-        "replica-set"
+        "replica-set",
+        "durcissement"
       ]
     }
   ]

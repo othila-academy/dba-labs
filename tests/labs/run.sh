@@ -11,7 +11,7 @@ source "$DBA_ROOT/tests/labs/lib.sh"
 trap 'rm -f "$TEST_OUT"; rm -rf "$LAB_STATE"' EXIT
 
 shopt -s nullglob
-scripts=("$DBA_ROOT"/tests/labs/*.sh "$DBA_ROOT"/.othila-lab/incidents/*.sh "$DBA_ROOT"/project/ops/*.sh "$DBA_ROOT"/project/runbooks/*.sh)
+scripts=("$DBA_ROOT"/tests/labs/*.sh "$DBA_ROOT"/.othila-lab/incidents/*.sh "$DBA_ROOT"/project/ops/*.sh "$DBA_ROOT"/project/runbooks/*.sh "$DBA_ROOT"/project/legacy/*.sh)
 shopt -u nullglob
 check "shellcheck : tests des labs, incidents, scripts des solutions" shellcheck -x "${scripts[@]}"
 check "bases démarrées" "$DB" up

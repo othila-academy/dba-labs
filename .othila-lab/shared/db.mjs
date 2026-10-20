@@ -38,13 +38,14 @@ export function connectionMessage(error, { user, database }) {
 }
 
 // Un client PostgreSQL ouvert le temps de fn, fermé ensuite quoi qu'il arrive.
-export async function withPg(fn, { user = 'postgres', password, database = 'valmorin', host = 'pg' } = {}) {
+export async function withPg(fn, { user = 'postgres', password, database = 'valmorin', host = 'pg', ssl } = {}) {
   const client = new pg.Client({
     host,
     port: 5432,
     user,
     database,
     password: password ?? readEnv('infra/.env.lab').POSTGRES_PASSWORD,
+    ssl,
     connectionTimeoutMillis: TIMEOUT_MS,
     statement_timeout: TIMEOUT_MS,
     query_timeout: TIMEOUT_MS + 1000,
