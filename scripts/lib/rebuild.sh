@@ -102,7 +102,7 @@ run_psql() {
 
 rs_init() {
   mongosh --quiet "mongodb://mongo1:27017/?directConnection=true" "$DBA_ROOT/infra/mongo/init-rs.js" \
-    || die "initialisation de rs0 impossible : scripts/db status"
+    || die "rs0 n'est pas prêt (message ci-dessus) : scripts/db status"
 }
 
 apply_schema() {

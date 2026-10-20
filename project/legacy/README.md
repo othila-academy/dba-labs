@@ -11,4 +11,6 @@ Ce que tu sais de leur configuration :
 
 Le lab `durcissement` te demande de les sécuriser **ici**, dans ces fichiers.
 
+Les clés privées ne vont jamais dans git. Si `project/legacy/gen-cert.sh` existe, `scripts/db` le lance avant chaque démarrage du serveur hérité (`up`, `restart`, `rebuild`) : il doit générer les certificats et les clés qui manquent, et ne rien faire s'ils sont là. Un clone neuf se reconstruit ainsi sans étape de plus.
+
 Par sécurité, `scripts/db` ne publie jamais un port sur `0.0.0.0`, quoi que déclare `compose.yaml` : il le ramène à `127.0.0.1` et le dit. Un serveur aussi ouvert que celui-ci ne doit pas être joignable depuis le réseau de la salle.

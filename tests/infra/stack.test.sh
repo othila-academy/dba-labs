@@ -84,6 +84,23 @@ check "doctor : vert sur cette machine" "$DB" doctor
 check "doctor : Docker injoignable, ✗ et code 1" expect_exit 1 env DOCKER_HOST=unix:///nonexistent "$DB" doctor
 check "status : en-tête du tableau en français, sans « <no value> »" bash -c "out=\"\$('$DB' status)\"; grep -q '^service *état *santé' <<<\"\$out\" && ! grep -q 'no value' <<<\"\$out\""
 
+# Lab replica-set : rs0 à trois membres, puis la panne du primaire. up relance le nœud arrêté et attend un primaire, où qu'il
+# soit, et trois membres sains ; sans le profil rs, il nomme les membres qui manquent. Un membre ajouté ne vote qu'après sa
+# synchronisation initiale (newlyAdded) : sans trois votants, l'arrêt du primaire n'en ferait élire aucun.
+rs3() { mongosh --quiet "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0&serverSelectionTimeoutMS=15000" --eval "$1"; }
+sains() { rs3 'rs.status().members.filter((m) => m.health === 1 && ["PRIMARY", "SECONDARY"].includes(m.stateStr)).length'; }
+rs3 'for (const host of ["mongo2:27017", "mongo3:27017"]) if (!rs.conf().members.some((m) => m.host === host)) rs.add({ host });
+  for (let i = 0; i < 240 && rs.status().writableVotingMembersCount < 3; i += 1) sleep(500)' >/dev/null
+check "rs0 à trois membres : trois membres sains" equals "$(sains)" 3
+docker stop dba-mongo1-1 >/dev/null
+check "panne de mongo1 : un autre nœud est élu" equals "$(rs3 'for (let i = 0; i < 60 && !db.hello().primary; i += 1) sleep(500); String(db.hello().primary !== "mongo1:27017" && Boolean(db.hello().primary))')" true
+check "après la panne, up relance mongo1, sans erreur" "$DB" up rs
+check "après la panne, trois membres sains dès la fin de up" equals "$(sains)" 3
+check "après la panne, mongo1 revient secondaire" equals "$(rs3 'rs.status().members.find((m) => m.name === "mongo1:27017").stateStr')" SECONDARY
+docker stop dba-mongo2-1 dba-mongo3-1 >/dev/null
+check "rs0 à trois membres sans le profil rs : up nomme les absents et le profil" output_matches 'mongo2:27017, mongo3:27017 ne répondent pas.*profil rs' "$DB" up
+check "rs0 à trois membres sans le profil rs : code 1" expect_exit 1 "$DB" up
+
 # Le lendemain : down le soir, up le matin. rs0 doit avoir son primaire sans rebuild.
 check "down puis up : rs0 a un primaire, sans rebuild" bash -c "'$DB' down >/dev/null && '$DB' up >/dev/null && [[ \"\$(mongosh --quiet 'mongodb://mongo1:27017/?replicaSet=rs0&serverSelectionTimeoutMS=10000' --eval 'db.hello().isWritablePrimary')\" == true ]]"
 # Codespaces : le hostname n'est pas l'identifiant du conteneur ; celui-ci se lit dans mountinfo.

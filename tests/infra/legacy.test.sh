@@ -35,6 +35,29 @@ check "legacy : clé privée copiée en 600, propriétaire 999" equals "$(docker
 check "legacy : certificat copié en 644" equals "$(docker run --rm -v dba-config:/cfg --entrypoint stat "$DBA_PG_IMAGE" -c '%a %u' /cfg/legacy/postgres/server.crt)" "644 999"
 rm -f "$LEGACY/project/legacy/postgres/server.key" "$LEGACY/project/legacy/postgres/server.crt"
 
+# Lab durcissement : les clés ne sont jamais dans git ; scripts/db lance project/legacy/gen-cert.sh, s'il existe, avant de
+# démarrer le serveur hérité, et seulement quand le profil legacy est actif.
+GEN="$LEGACY/project/legacy/gen-cert.sh"
+cat >"$GEN" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+[[ -f postgres/server.key ]] || openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=pg-legacy \
+  -keyout postgres/server.key -out postgres/server.crt 2>/dev/null
+EOF
+chmod +x "$GEN"
+check "legacy : up lance gen-cert.sh et le dit" output_matches 'project/legacy/gen-cert\.sh' run_legacy up
+check "legacy : la clé générée arrive en 600 dans le serveur" equals "$(docker run --rm -v dba-config:/cfg --entrypoint stat "$DBA_PG_IMAGE" -c '%a %u' /cfg/legacy/postgres/server.key)" "600 999"
+printf '#!/usr/bin/env bash\necho "openssl introuvable" >&2\nexit 3\n' >"$GEN"
+check "legacy : gen-cert.sh en échec arrête up, et le nomme" output_matches '^erreur : project/legacy/gen-cert\.sh a échoué' run_legacy up
+chmod -x "$GEN"
+check "legacy : gen-cert.sh non exécutable, le message dit chmod +x" output_matches 'chmod \+x project/legacy/gen-cert\.sh' run_legacy up
+chmod +x "$GEN"
+echo 'COMPOSE_PROFILES=' >"$LEGACY/project/stack.env"
+check "legacy : sans le profil legacy, gen-cert.sh n'est pas lancé" bash -c "! DBA_PROJECT='$LEGACY/project' '$DB' up 2>&1 | grep -q gen-cert"
+echo 'COMPOSE_PROFILES=legacy' >"$LEGACY/project/stack.env"
+rm -f "$GEN" "$LEGACY/project/legacy/postgres/server.key" "$LEGACY/project/legacy/postgres/server.crt"
+
 # I4 : après un down, up laisse le serveur hérité vide ; il le dit et renvoie au rebuild.
 run_legacy down >/dev/null 2>&1
 check "legacy : up sur un serveur hérité vide renvoie à scripts/db rebuild" output_matches 'serveur hérité vide.*scripts/db rebuild' run_legacy up
