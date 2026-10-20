@@ -97,6 +97,15 @@ check "panne de mongo1 : un autre nœud est élu" equals "$(rs3 'for (let i = 0;
 check "après la panne, up relance mongo1, sans erreur" "$DB" up rs
 check "après la panne, trois membres sains dès la fin de up" equals "$(sains)" 3
 check "après la panne, mongo1 revient secondaire" equals "$(rs3 'rs.status().members.find((m) => m.name === "mongo1:27017").stateStr')" SECONDARY
+# La vue du primaire, celle que lisent les applications et les checks, compte aussi : elle peut avoir un battement de cœur de
+# retard sur le nœud relancé. Quatre pannes de suite, du primaire du moment.
+pannes_ok=0
+for _ in 1 2 3 4; do
+  primaire="$(rs3 'db.hello().primary')"
+  docker stop "dba-${primaire%%:*}-1" >/dev/null
+  "$DB" up rs >/dev/null 2>&1 && [[ "$(sains)" == 3 ]] && pannes_ok=$((pannes_ok + 1))
+done
+check "quatre pannes du primaire de suite : après chaque up, le primaire voit trois membres sains" equals "$pannes_ok" 4
 docker stop dba-mongo2-1 dba-mongo3-1 >/dev/null
 check "rs0 à trois membres sans le profil rs : up nomme les absents et le profil" output_matches 'mongo2:27017, mongo3:27017 ne répondent pas.*profil rs' "$DB" up
 check "rs0 à trois membres sans le profil rs : code 1" expect_exit 1 "$DB" up

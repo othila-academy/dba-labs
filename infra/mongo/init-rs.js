@@ -9,11 +9,20 @@ try {
   print('rs0 initialisé avec mongo1:27017');
 }
 const sain = (m) => m.health === 1 && ['PRIMARY', 'SECONDARY'].includes(m.stateStr);
+// La vue du primaire : c'est lui qu'interrogent les applications et les checks, et il peut voir un nœud relancé un battement
+// de cœur (2 s) après que ce nœud se voit lui-même sain.
+const vueDuPrimaire = (nom) => {
+  try {
+    return new Mongo(`mongodb://${nom}/?directConnection=true`).getDB('admin').runCommand({ replSetGetStatus: 1 }).members ?? [];
+  } catch {
+    return [];
+  }
+};
 let membres = [];
 for (let i = 0; i < 120; i += 1) {
   membres = rs.status().members;
-  const primaire = membres.some((m) => m.stateStr === 'PRIMARY');
-  if (primaire && membres.every(sain)) break;
+  const primaire = membres.find((m) => m.stateStr === 'PRIMARY');
+  if (primaire && membres.every(sain) && (primaire.self || vueDuPrimaire(primaire.name).every(sain))) break;
   // Sans primaire au bout de 10 s, avec des membres injoignables : il n'en viendra pas, inutile d'attendre davantage.
   if (!primaire && i >= 20 && membres.some((m) => m.health !== 1)) break;
   sleep(500);
@@ -25,3 +34,6 @@ if (!membres.some((m) => m.stateStr === 'PRIMARY')) {
     : 'rs0 sans primaire après 60 s');
 }
 if (absents) throw new Error(`rs0 a un primaire, mais ${absents} ne sont pas sains après 60 s : scripts/db status`);
+const primaire = membres.find((m) => m.stateStr === 'PRIMARY');
+const vus = primaire.self ? [] : vueDuPrimaire(primaire.name).filter((m) => !sain(m)).map((m) => m.name);
+if (vus.length) throw new Error(`rs0 : le primaire ${primaire.name} ne voit pas encore ${vus.join(', ')} après 60 s : scripts/db status`);
