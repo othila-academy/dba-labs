@@ -1,11 +1,15 @@
 // Les aides communes des checks, contre la vraie stack (scripts/db up) et contre des hôtes injoignables.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { test } from 'node:test';
 import {
   DOWN, connectionMessage, expectRejected, inRollback, readEnv, withMongo, withPg
 } from '../../.othila-lab/shared/db.mjs';
 import { seqScansOn } from '../../.othila-lab/shared/plan.mjs';
+import { gitStatusOf, latestFile, missingSections } from '../../.othila-lab/shared/fichiers.mjs';
 import { Q1, Q2 } from '../../.othila-lab/labs/requete-lente/requetes.mjs';
 
 test('readEnv lit les identifiants de lab', () => {
@@ -69,4 +73,31 @@ test('application.sql joue mot pour mot Q1 et Q2', () => {
   const sql = readFileSync(new URL('../../.othila-lab/labs/requete-lente/application.sql', import.meta.url), 'utf8');
   assert.ok(sql.includes(`${Q1};`), 'Q1');
   assert.ok(sql.includes(`${Q2};`), 'Q2');
+});
+
+test('missingSections : titres de tout niveau, apostrophes et casse indifférentes', () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'sections-'));
+  const file = path.join(dir, 'doc.md');
+  writeFileSync(file, '# Titre\n\n## Choix d’imbrication\ntexte\n### surveillance\n');
+  assert.deepEqual(missingSections(file, ["Choix d'imbrication", 'Surveillance', 'Menaces']), ['Menaces']);
+});
+
+test('latestFile : le plus récent qui suit le motif, ou null', () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'latest-'));
+  assert.equal(latestFile(path.join(dir, 'absent'), /x/), null);
+  writeFileSync(path.join(dir, 'a-1.dump'), '');
+  writeFileSync(path.join(dir, 'autre.txt'), '');
+  assert.equal(path.basename(latestFile(dir, /^a-\d\.dump$/)), 'a-1.dump');
+});
+
+test('gitStatusOf : suivi, ignoré, visible', () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'git-'));
+  execFileSync('git', ['init', '-q', dir]);
+  writeFileSync(path.join(dir, '.gitignore'), '*.key\n');
+  writeFileSync(path.join(dir, 'a.key'), '');
+  writeFileSync(path.join(dir, 'b.txt'), '');
+  assert.equal(gitStatusOf(dir, 'a.key'), 'ignore');
+  assert.equal(gitStatusOf(dir, 'b.txt'), 'visible');
+  execFileSync('git', ['-C', dir, 'add', '-f', 'a.key']);
+  assert.equal(gitStatusOf(dir, 'a.key'), 'suivi');
 });
