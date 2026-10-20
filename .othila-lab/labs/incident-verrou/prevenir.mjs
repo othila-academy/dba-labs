@@ -12,7 +12,9 @@ project/schema/030_garde-fous.sql :
 ALTER ROLE … SET … s'applique aux nouvelles connexions du rôle. Puis scripts/db rebuild, et vérifie en te connectant avec lui :
 psql -h pg -U app_valmorin -d valmorin -c 'show lock_timeout'.
 Écris enfin project/runbooks/verrou.sh, exécutable : il montre les sessions bloquées et celles qui les bloquent, termine les
-sessions « idle in transaction » qui bloquent quelqu'un, et elles seules, puis vérifie qu'il n'y a plus d'attente.
+sessions « idle in transaction » qui bloquent quelqu'un, et elles seules, puis vérifie qu'il n'y a plus d'attente. Attention :
+l'application réessaie ; entre deux essais, personne n'attend. Le runbook observe donc quelques secondes, plus que le
+lock_timeout de l'application, avant de conclure.
 Rejoue-le : scripts/db incident verrou, puis project/runbooks/verrou.sh.
 
 À expliquer (npx lab submit incident-verrou prevenir) : pourquoi poser ces délais sur le rôle de l'application plutôt que sur tout le serveur ?`;
@@ -61,7 +63,7 @@ export const checks = [
 export const hints = [
   'Un réglage se pose pour tout le serveur, pour une base, ou pour un rôle. Lequel ne gêne ni postgres ni les autres applications ?',
   "alter role app_valmorin set idle_in_transaction_session_timeout = '…' ; idem pour lock_timeout. Le runbook : psql -h pg -U postgres -d valmorin, une requête sur pg_stat_activity et pg_blocking_pids, puis pg_terminate_backend.",
-  "030_garde-fous.sql : alter role app_valmorin set idle_in_transaction_session_timeout = '1min'; alter role app_valmorin set lock_timeout = '10s'; runbook : select pg_terminate_backend(pid, 5000) from pg_stat_activity where state = 'idle in transaction' and pid in (select unnest(pg_blocking_pids(pid)) from pg_stat_activity);"
+  "030_garde-fous.sql : alter role app_valmorin set idle_in_transaction_session_timeout = '1min'; alter role app_valmorin set lock_timeout = '10s'; runbook : une boucle de 15 s (sleep 0.5) qui lance select pg_terminate_backend(pid, 5000) from pg_stat_activity where state = 'idle in transaction' and pid in (select unnest(pg_blocking_pids(pid)) from pg_stat_activity), et s'arrête quand elle a terminé une session et que plus personne n'attend."
 ];
 
 export const points = 150;

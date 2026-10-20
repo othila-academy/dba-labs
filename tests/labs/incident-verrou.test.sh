@@ -50,3 +50,9 @@ garde_fous
 "$DB" incident verrou >/dev/null
 check "avec garde-fous : le runbook débloque" bash -c "cd '$DBA_ROOT' && project/runbooks/verrou.sh"
 check "avec garde-fous : tout passe" equals "$(failed_ids incident-verrou)" ""
+
+# Entre deux essais du guichet, personne n'attend : le runbook doit observer plus longtemps que le lock_timeout de l'application.
+"$DB" incident verrou >/dev/null
+pg_sql postgres "select pg_terminate_backend(pid, 5000) from pg_stat_activity where application_name = 'guichet-centre'" >/dev/null
+check "runbook lancé entre deux essais du guichet : l'inventaire est quand même terminé" bash -c "cd '$DBA_ROOT' && project/runbooks/verrou.sh >/dev/null && [[ \"\$(PGPASSWORD='$POSTGRES_PASSWORD' psql -h pg -U postgres -d postgres -tAXc \"select count(*) from pg_stat_activity where application_name = 'inventaire'\")\" == 0 ]]"
+check "runbook lancé entre deux essais du guichet : tout passe" equals "$(failed_ids incident-verrou)" ""

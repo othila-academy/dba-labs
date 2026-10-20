@@ -14,6 +14,10 @@ check "incident : mongo2 et mongo3 tournent toujours" equals "$(docker inspect d
 check "incident : project/ n'a pas bougé" equals "$(git -C "$DBA_ROOT" status --porcelain -- project)" "$project_before"
 check "pendant la panne : une écriture w: majority passe (2 membres sur 3)" equals "$(rs3 'db.journal.insertOne({ a: 1 }, { writeConcern: { w: "majority", wtimeout: 15000 } }).acknowledged')" true
 rs3 'db.journal.drop()' >/dev/null
+# La consigne de basculer se connecte par les trois hôtes : scripts/db mongosh ne connaît que mongo1, arrêté pendant la panne.
+consigne() { (cd "$DBA_ROOT" && node -e "import('./.othila-lab/labs/replica-set/basculer.mjs').then((m) => process.stdout.write(m.instructions))"); }
+check "basculer : la consigne joint rs0 par les trois hôtes" matches "$(consigne)" 'mongosh "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/valmorin\?replicaSet=rs0"'
+check "pendant la panne : la chaîne de la consigne joint rs0" equals "$(mongosh --quiet 'mongodb://mongo1:27017,mongo2:27017,mongo3:27017/valmorin?replicaSet=rs0' --eval 'rs.status().ok')" 1
 check "pendant la panne : trois-membres nomme le nœud absent" matches "$(failure_of replica-set repliquer trois-membres)" 'mongo1:27017 injoignable'
 check "après la panne, scripts/db up relance mongo1" "$DB" up
 check "replica-set : la bascule est vue" equals "$(failed_ids replica-set basculer)" ""

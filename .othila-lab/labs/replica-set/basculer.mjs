@@ -3,9 +3,12 @@ import { withMongo } from '../../shared/db.mjs';
 import { RS_URI, etat, rsStatus } from './rs.mjs';
 
 export const title = 'La panne du primaire';
-export const instructions = `Lance scripts/db incident primaire. Puis, dans mongosh sur rs0 (scripts/db mongosh) :
+export const instructions = `Lance scripts/db incident primaire. Puis connecte-toi à rs0 comme l'application, par les trois hôtes :
+scripts/db mongosh ne connaît que mongo1, arrêté pendant la panne.
+  mongosh "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/valmorin?replicaSet=rs0"
   - rs.status().members.map((m) => [m.name, m.stateStr]) : qui est devenu primaire, et en combien de temps ?
   - écris pendant la panne : db.journal.insertOne({ a: new Date() }, { writeConcern: { w: 'majority' } }) ;
+scripts/db status montre les conteneurs ; scripts/db mongosh mongo2 joint un nœud précis.
 Relance le nœud arrêté : scripts/db up. Il revient SECONDARY : il rattrape ce qu'il a manqué, depuis l'oplog des autres.
 
 À expliquer (npx lab submit replica-set basculer) : pourquoi le nœud relancé ne reprend-il pas sa place de primaire ?`;
@@ -39,7 +42,7 @@ export const checks = [
 
 export const hints = [
   'Un replica set élit un primaire quand la majorité de ses membres le peut. Que voit rs.status() juste après l’arrêt ?',
-  'scripts/db incident primaire ; scripts/db mongosh, puis rs.status() plusieurs fois ; scripts/db status ; enfin scripts/db up.',
+  'scripts/db incident primaire ; mongosh "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/valmorin?replicaSet=rs0", puis rs.status() plusieurs fois ; enfin scripts/db up.',
   'scripts/db incident primaire, puis scripts/db up : le term de rs0 passe à 2 et les trois membres redeviennent sains.'
 ];
 
