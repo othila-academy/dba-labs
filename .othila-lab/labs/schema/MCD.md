@@ -1,6 +1,20 @@
 # Le modèle conceptuel des prêts de Valmorin
 
-Le dictionnaire de données (les noms exacts, et ce que contiennent les données) est dans `infra/seed/CONTRAT.md`.
+Le dictionnaire de données (ce que contiennent les données, et ce qui peut manquer) est dans `infra/seed/CONTRAT.md`.
+
+## Les colonnes de chaque table
+
+Les noms sont un contrat avec les données et les checks : orthographe exacte, en minuscules, sans accent. Les colonnes en `…_id` viennent des associations ci-dessous : une cardinalité 1,1 devient une clé étrangère du côté de l'entité qui porte le 1,1.
+
+| Table | Colonnes |
+|---|---|
+| `site` | `id`, `nom`, `ville` |
+| `adherent` | `id`, `numero_carte`, `nom`, `prenom`, `email`, `telephone`, `date_inscription`, `site_id` |
+| `auteur` | `id`, `nom`, `prenom` |
+| `ouvrage` | `id`, `isbn`, `titre`, `annee`, `editeur` |
+| `ouvrage_auteur` | `ouvrage_id`, `auteur_id` |
+| `exemplaire` | `id`, `ouvrage_id`, `site_id`, `code_barre`, `etat` |
+| `emprunt` | `id`, `exemplaire_id`, `adherent_id`, `date_emprunt`, `date_retour_prevue`, `date_retour` |
 
 ## Entités
 

@@ -8,7 +8,9 @@ export const instructions = `Active l'extension pg_stat_statements, qui compte c
   - elle se crée dans la base : project/post/020_perf.sql (joué après les données), puis scripts/db rebuild.
 Rejoue ensuite la charge de l'application :
   scripts/db psql postgres valmorin -f .othila-lab/labs/requete-lente/application.sql
-et cherche dans la vue pg_stat_statements les requêtes qui coûtent le plus (total_exec_time, calls, mean_exec_time).
+(il remet d'abord les compteurs à zéro : sinon, les insertions de données du rebuild arriveraient en tête), puis, dans
+scripts/db psql postgres valmorin, cherche dans la vue pg_stat_statements les requêtes qui coûtent le plus (total_exec_time,
+calls, mean_exec_time).
 
 À expliquer (npx lab submit requete-lente surveiller) : quelles sont les deux requêtes les plus coûteuses, et qu'est-ce qui les distingue des autres ?`;
 

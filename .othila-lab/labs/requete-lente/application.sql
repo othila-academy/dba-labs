@@ -1,6 +1,8 @@
 -- La charge de l'application des médiathèques, à rejouer pour pg_stat_statements :
 --   scripts/db psql postgres valmorin -f .othila-lab/labs/requete-lente/application.sql
 \o /dev/null
+-- Les compteurs remis à zéro (si l'extension existe) : sans cela, les insertions de données du rebuild arrivent en tête.
+do $$ begin if exists (select from pg_extension where extname = 'pg_stat_statements') then perform pg_stat_statements_reset(); end if; end $$;
 select count(*) from site;
 select id, nom, prenom from adherent where numero_carte = 'VAL004242';
 select titre from ouvrage where isbn = '9780000004242';

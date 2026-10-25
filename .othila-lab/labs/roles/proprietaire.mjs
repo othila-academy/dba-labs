@@ -35,7 +35,7 @@ export const checks = [
         );
         const others = rows.filter((r) => r.owner !== 'dba_valmorin').map((r) => `${r.tbl} (${r.owner})`);
         assert(rows.length === TABLE_NAMES.length, `Attendu : les 7 tables du dictionnaire. Constaté : ${rows.length}.`);
-        assert(others.length === 0, `Attendu : dba_valmorin propriétaire. Constaté : ${others.join(', ')}. \\dt dans psql montre le propriétaire de chaque table.`);
+        assert(others.length === 0, `Attendu : dba_valmorin propriétaire. Constaté : ${others.join(', ')}. \\dt dans scripts/db psql postgres valmorin montre le propriétaire de chaque table.`);
       })
   },
   {

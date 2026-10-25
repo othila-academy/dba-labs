@@ -35,3 +35,9 @@ fresh_schema "$SOLUTION" "alter table ouvrage add check (isbn ~ '^97[89][0-9]{10
 check "schema : une règle de format ISBN-13 (978 ou 979) → les règles passent encore" equals "$(failed_ids schema regles)" ""
 
 check "schema : rebuild remet la solution" "$DB" rebuild
+
+# Le MCD donne toutes les colonnes du contrat, y compris celles des clés étrangères (absentes de infra/seed/CONTRAT.md).
+for col in exemplaire.ouvrage_id exemplaire.site_id emprunt.exemplaire_id emprunt.adherent_id adherent.site_id; do
+  check "schema : MCD.md nomme la colonne $col" grep -q "${col#*.}" "$DBA_ROOT/.othila-lab/labs/schema/MCD.md"
+done
+check "schema : la consigne de tables donne un exemple de create table" matches "$(cd "$DBA_ROOT" && node -e "import('./.othila-lab/labs/schema/tables.mjs').then((m) => process.stdout.write(m.instructions))")" 'create table site'

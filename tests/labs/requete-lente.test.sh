@@ -7,6 +7,8 @@ Q2="$(query_of Q2)"
 check "requete-lente : la consigne parle des index que le schéma de l'étudiant aurait déjà posés" matches "$(cd "$DBA_ROOT" && node -e "import('./.othila-lab/labs/requete-lente/indexer.mjs').then((m) => process.stdout.write(m.instructions))")" '[Ss]i ton schéma pose déjà un index sur emprunt'
 check "requete-lente : tout passe sur la solution" equals "$(failed_ids requete-lente)" ""
 check "requete-lente : application.sql se joue" "$DB" psql postgres valmorin -f "$DBA_ROOT/.othila-lab/labs/requete-lente/application.sql"
+# Les compteurs remis à zéro par application.sql : en tête, une requête de l'application, pas une insertion du rebuild.
+check "requete-lente : après application.sql, la requête la plus coûteuse n'est pas une insertion du rebuild" bash -c "[[ \"\$(PGPASSWORD='$POSTGRES_PASSWORD' psql -h pg -U postgres -d valmorin -tAXc 'select left(query, 6) from pg_stat_statements order by total_exec_time desc limit 1')\" == select ]]"
 check "requete-lente : pg_stat_statements a compté Q2 trois fois au moins" test "$(pg_sql valmorin "select coalesce(sum(calls), 0) from pg_stat_statements where query like '%date_retour_prevue <%'")" -ge 3
 
 # Le coût estimé de tout le plan, tel que retenu, puis sans parcours d'index ni de bitmap : c'est l'écart que le

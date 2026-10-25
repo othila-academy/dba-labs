@@ -2,7 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { withPg } from '../../shared/db.mjs';
 
 export const title = 'Facultatif : l’index en double';
-export const instructions = `Facultatif. L'ancien prestataire a posé des index sur emprunt : \\d emprunt les liste. Deux d'entre eux
+export const instructions = `Facultatif. L'ancien prestataire a posé des index sur emprunt : \\d emprunt (dans scripts/db psql postgres valmorin) les liste. Deux d'entre eux
 sont identiques, sous deux noms. Un index inutile ne coûte rien en lecture, mais chaque insertion et chaque mise à jour de
 emprunt doit le maintenir, et il occupe de la place : select pg_size_pretty(pg_relation_size('<nom de l''index>'));
 Supprime le doublon dans project/post/020_perf.sql : les index du prestataire sont posés avec les données, avant project/post.
