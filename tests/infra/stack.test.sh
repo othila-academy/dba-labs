@@ -13,6 +13,15 @@ no_bind_mount() { ! docker inspect dba-pg-1 --format '{{range .Mounts}}{{.Type}}
 
 check "down : part d'une machine propre" "$DB" down
 check "up : démarre et attend la santé" "$DB" up
+
+# Codespaces : le devcontainer est en mode réseau host, il ne peut pas rejoindre dba-net. scripts/db écrit alors les noms des
+# services et leurs adresses dans un fichier hosts (un bloc repéré, réécrit à chaque appel). Essayé ici sur un fichier jetable.
+HOSTS_ESSAI="$(mktemp)"
+printf '127.0.0.1 localhost\n10.9.9.9 pg # dba-net\n' >"$HOSTS_ESSAI"
+check "réseau host : les noms des services pointent vers leurs adresses sur dba-net" bash -c "source '$DBA_ROOT/scripts/lib/common.sh'; source '$DBA_ROOT/scripts/lib/stack.sh'; DBA_HOSTS_FILE='$HOSTS_ESSAI' hosts_fallback >/dev/null && grep -qx \"\$(docker inspect dba-pg-1 --format '{{(index .NetworkSettings.Networks \"dba-net\").IPAddress}}') pg # dba-net\" '$HOSTS_ESSAI'"
+check "réseau host : l'ancienne adresse a disparu, le reste du fichier est gardé" bash -c "! grep -q '10.9.9.9' '$HOSTS_ESSAI' && grep -qx '127.0.0.1 localhost' '$HOSTS_ESSAI' && [[ \$(grep -c ' pg # dba-net\$' '$HOSTS_ESSAI') == 1 ]]"
+check "réseau host : mongo1 a aussi son adresse" grep -q ' mongo1 # dba-net$' "$HOSTS_ESSAI"
+rm -f "$HOSTS_ESSAI"
 FIX_INCIDENTS="$DBA_ROOT/tests/infra/fixtures/incidents"
 check "incident : joué avec les fonctions et les identifiants de scripts/db" output_matches '14:02 — essai 42' bash -c "DBA_INCIDENTS='$FIX_INCIDENTS' '$DB' incident essai | paste -sd' ' -"
 check "incident en échec : code 1" expect_exit 1 env DBA_INCIDENTS="$FIX_INCIDENTS" "$DB" incident panne

@@ -45,12 +45,43 @@ self_container_id() {
   if [[ -n $id ]]; then printf '%s\n' "${id#containers/}"; else hostname; fi
 }
 
+# Les services de dba-net et leur adresse, une ligne « adresse service » chacun.
+dba_hosts_lines() {
+  local id
+  for id in $(docker network inspect dba-net --format '{{range $id, $c := .Containers}}{{$id}} {{end}}' 2>/dev/null); do
+    docker inspect "$id" --format '{{(index .NetworkSettings.Networks "dba-net").IPAddress}} {{index .Config.Labels "com.docker.compose.service"}}' 2>/dev/null
+  done | awk 'NF == 2'
+}
+
+# Sur Codespaces, le devcontainer partage le réseau de la machine (mode host) : il ne peut pas rejoindre dba-net, mais il
+# joint chaque conteneur par son adresse. On écrit donc leurs noms dans /etc/hosts, dans un bloc repéré par « # dba-net »,
+# réécrit à chaque appel (les adresses changent à chaque up). Le reste du fichier ne bouge pas.
+hosts_fallback() {
+  local file=${DBA_HOSTS_FILE:-/etc/hosts} lines content
+  lines="$(dba_hosts_lines)"
+  [[ -n $lines ]] || return 0
+  content="$(grep -v ' # dba-net$' "$file"; awk '{ print $0 " # dba-net" }' <<<"$lines")"
+  [[ $content == "$(cat "$file")" ]] && return 0
+  # /etc/hosts est monté dans le conteneur : on le réécrit en place, jamais par remplacement.
+  if [[ -w $file ]]; then
+    printf '%s\n' "$content" >"$file"
+  else
+    printf '%s\n' "$content" | sudo -n tee "$file" >/dev/null \
+      || die "devcontainer en réseau host : impossible d'écrire les noms des bases dans $file (sudo refusé)"
+  fi
+  info "devcontainer en réseau host (Codespaces) : noms des bases écrits dans $file"
+}
+
 # Dans un conteneur (devcontainer, Codespaces, CI) : rejoindre dba-net pour joindre pg et mongo1 par leur nom.
 attach_devcontainer() {
   [[ -f /.dockerenv ]] || return 0
   docker network inspect dba-net >/dev/null 2>&1 || return 0
   local me
   me="$(self_container_id)"
+  if [[ "$(docker inspect "$me" --format '{{.HostConfig.NetworkMode}}' 2>/dev/null)" == host ]]; then
+    hosts_fallback
+    return 0
+  fi
   if docker inspect "$me" --format '{{json .NetworkSettings.Networks}}' | grep -q '"dba-net"'; then
     return 0
   fi
@@ -93,6 +124,7 @@ cmd_restart() {
   config_sync
   compose restart "$1"
   compose up -d --wait --wait-timeout 120 "$1" || die "$1 ne redémarre pas : scripts/db status, puis docker compose -p dba logs $1"
+  attach_devcontainer
   info "$1 redémarré avec la configuration de project/"
 }
 
