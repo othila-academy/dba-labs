@@ -11,9 +11,9 @@ Puis scripts/db rebuild, connecte-toi avec lui (psql -h pg -U analyste -d valmor
 
 export const prediction = {
   promptId: 'roles-select-etoile',
-  question: 'Pour analyste, que donne select * from adherent ?',
-  choices: ['toutes les colonnes sauf email et téléphone', 'une erreur de permission', 'email et téléphone vides'],
-  expected: 'une erreur de permission'
+  question: 'Pour analyste, que donne select * from adherent ?\n  a) toutes les colonnes sauf email et téléphone\n  b) une erreur de permission\n  c) email et téléphone vides',
+  choices: ['a', 'b', 'c'],
+  expected: 'b'
 };
 
 const analyste = (fn) => () => inRollback(fn, as('analyste'));

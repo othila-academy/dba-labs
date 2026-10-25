@@ -13,9 +13,9 @@ Complète 001_schema.sql, puis scripts/db rebuild.
 
 export const prediction = {
   promptId: 'schema-suppression-referencee',
-  question: 'Sans clause ON DELETE, supprimer un adhérent qui a des emprunts…',
-  choices: ['supprime aussi ses emprunts', 'est refusé', 'laisse des emprunts orphelins'],
-  expected: 'est refusé'
+  question: 'Sans clause ON DELETE, supprimer un adhérent qui a des emprunts…\n  a) est refusé\n  b) supprime aussi ses emprunts\n  c) laisse des emprunts orphelins',
+  choices: ['a', 'b', 'c'],
+  expected: 'a'
 };
 
 export const checks = [

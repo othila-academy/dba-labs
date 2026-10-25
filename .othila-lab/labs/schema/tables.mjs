@@ -16,9 +16,9 @@ Puis scripts/db rebuild. Tant que les 7 tables n'existent pas, rebuild ne charge
 
 export const prediction = {
   promptId: 'schema-association-n-n',
-  question: 'L’association « écrit par » (plusieurs auteurs par ouvrage, plusieurs ouvrages par auteur) devient…',
-  choices: ['une colonne auteur_id dans ouvrage', 'une table à part', 'une colonne ouvrage_id dans auteur'],
-  expected: 'une table à part'
+  question: 'L’association « écrit par » (plusieurs auteurs par ouvrage, plusieurs ouvrages par auteur) devient…\n  a) une colonne auteur_id dans ouvrage\n  b) une table à part\n  c) une colonne ouvrage_id dans auteur',
+  choices: ['a', 'b', 'c'],
+  expected: 'b'
 };
 
 export const checks = [

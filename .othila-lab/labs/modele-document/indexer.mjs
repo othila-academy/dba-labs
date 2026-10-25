@@ -17,9 +17,9 @@ mongotop 2 --uri "mongodb://mongo1:27017/?replicaSet=rs0", puis mongostat --uri 
 
 export const prediction = {
   promptId: 'modele-mongotop',
-  question: 'Que montre mongotop, collection par collection ?',
-  choices: ['le temps passé en lecture et en écriture', 'le nombre de documents', 'la place occupée sur le disque'],
-  expected: 'le temps passé en lecture et en écriture'
+  question: 'Que montre mongotop, collection par collection ?\n  a) le nombre de documents\n  b) la place occupée sur le disque\n  c) le temps passé en lecture et en écriture',
+  choices: ['a', 'b', 'c'],
+  expected: 'c'
 };
 
 function requireIndexScan(stages, nom) {

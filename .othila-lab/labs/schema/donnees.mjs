@@ -11,9 +11,9 @@ combien d'emprunts sont en cours ? Combien d'adhérents n'ont pas de téléphone
 
 export const prediction = {
   promptId: 'schema-seeds-refuses',
-  question: 'Si ta règle sur etat oublie la valeur abime, que fait scripts/db rebuild ?',
-  choices: ['il ignore les exemplaires abîmés', 'il s’arrête sur la contrainte', 'il charge quand même tout'],
-  expected: 'il s’arrête sur la contrainte'
+  question: 'Si ta règle sur etat oublie la valeur abime, que fait scripts/db rebuild ?\n  a) il ignore les exemplaires abîmés\n  b) il charge quand même tout\n  c) il s’arrête sur la contrainte',
+  choices: ['a', 'b', 'c'],
+  expected: 'c'
 };
 
 export const checks = [
