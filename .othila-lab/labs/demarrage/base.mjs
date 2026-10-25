@@ -7,7 +7,9 @@ export const title = 'Créer la base valmorin';
 export const explain = 'Pourquoi décrire la base dans un fichier plutôt que la créer dans psql ?';
 export const instructions = `Crée la base valmorin dans un fichier : project/schema/000_database.sql. scripts/db rebuild joue les
 fichiers de project/schema dans l'ordre de leur nom : ceux qui commencent par 000_ sur la base postgres (une base se crée
-depuis une autre), les suivants sur valmorin. Lance scripts/db rebuild, puis vérifie avec \\l dans scripts/db psql.
+depuis une autre), les suivants sur valmorin.
+Repère : en SQL, une base se crée avec create database <nom>; (le point-virgule termine l'instruction).
+Lance scripts/db rebuild, puis vérifie avec \\l dans scripts/db psql.
 Essaie aussi l'inverse : crée une base essai à la main dans psql, puis relance scripts/db rebuild. Où est-elle passée ?
 
 À expliquer (npx lab submit demarrage base) : pourquoi décrire la base dans un fichier plutôt que la créer dans psql ?`;

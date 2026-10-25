@@ -67,7 +67,7 @@ export const checks = [
 export const hints = [
   'Le dump contient bien plus que emprunt. Comment n’en prendre qu’une partie ? Et qu’est-ce qui, dans un dump, appartient à emprunt sans être la table elle-même ?',
   'pg_restore -l <dump> > liste.txt ; garde les lignes qui concernent emprunt : table, données, séquence, contraintes, clés étrangères, index, droits ; puis pg_restore -L liste.txt -d valmorin <dump>. -t emprunt seul oublie les clés étrangères.',
-  'dump=$(ls -t backups/valmorin-*.dump | head -1) ; pg_restore -l "$dump" | grep emprunt > "$liste" ; pg_restore -h pg -U postgres -d valmorin --exit-on-error -L "$liste" "$dump" ; puis analyze emprunt.'
+  'dump=$(ls -t backups/valmorin-*.dump | head -1) ; pg_restore -l "$dump" | grep emprunt > "$liste" ; pg_restore -h pg -U postgres -d valmorin --exit-on-error -L "$liste" "$dump" ; puis analyze emprunt (il recalcule les statistiques de la table recréée ; on le revoit au lab suivant).'
 ];
 
 export const points = 200;

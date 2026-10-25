@@ -7,6 +7,8 @@ export const explain = 'Dba_valmorin administre la base ; pourquoi ne pas en fai
 export const instructions = `Crée project/schema/010_roles.sql : scripts/db rebuild le joue sur valmorin, après 001_schema.sql.
 Crée le rôle dba_valmorin, qui se connecte avec le mot de passe de lab dba-valmorin-lab. Il possède les 7 tables et peut créer
 de nouveaux objets dans le schéma public, mais il n'est ni superutilisateur, ni capable de créer des rôles ou des bases.
+Repère : 001_schema.sql est joué par postgres, qui possède donc les 7 tables ; la propriété d'un objet existant se transfère
+(alter table <table> owner to <rôle>).
 Puis scripts/db rebuild, et essaie : psql -h pg -U dba_valmorin -d valmorin (le mot de passe est demandé).
 
 À expliquer (npx lab submit roles proprietaire) : dba_valmorin administre la base ; pourquoi ne pas en faire un superutilisateur ?`;

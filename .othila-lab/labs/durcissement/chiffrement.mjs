@@ -14,6 +14,8 @@ export const instructions = `Facultatif. Mots de passe et données passent en cl
   - la clé privée ne va jamais dans git : un .gitignore dans project/legacy/ l'écarte (git status ne doit pas la montrer) ;
   - postgresql.conf : ssl = on, et ssl_cert_file et ssl_key_file vers /etc/dba/legacy/postgres/… (scripts/db y copie project/legacy/) ;
   - pg_hba.conf : hostssl au lieu de host, pour refuser toute connexion en clair.
+Repère : un certificat sert à deux choses : chiffrer le canal, et prouver l'identité du serveur à un client qui le vérifie
+auprès d'une autorité de confiance.
 Puis scripts/db rebuild, et : psql "host=pg-legacy user=postgres sslmode=require" -c 'select * from pg_stat_ssl where pid = pg_backend_pid()'.
 
 À expliquer (npx lab submit durcissement chiffrement) : contre quoi protège un certificat auto-signé, et contre quoi ne protège-t-il pas ?`;

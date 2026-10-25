@@ -20,6 +20,8 @@ terminees=0
 for _ in $(seq 1 30); do
   # À COMPLÉTER : termine (pg_terminate_backend) les sessions « idle in transaction » qui bloquent quelqu'un, et elles
   # seules ; la requête rend une ligne par session terminée.
+  # Repère : unnest(tableau) rend une ligne par élément ; select unnest(pg_blocking_pids(pid)) from pg_stat_activity liste
+  # donc les pid qui bloquent quelqu'un.
   lignes="$(sql -tAc "select pid from pg_stat_activity where false")"
   if [[ -n $lignes ]]; then
     printf '  %s\n' "$lignes"

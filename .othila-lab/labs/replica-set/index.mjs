@@ -11,9 +11,9 @@ tableau. Avant ce lab : COMPOSE_PROFILES=rs dans project/stack.env (étape repli
 export const objectives = [
   'passer un replica set de un à trois membres',
   'fixer la préoccupation d’écriture par défaut, et dire ce qu’elle garantit',
-  'écrire la chaîne de connexion d’une application à un replica set',
   'observer une élection, puis le retour d’un nœud',
-  'sauvegarder MongoDB en lisant sur un secondaire (mongodump, mongorestore --dryRun)'
+  'sauvegarder MongoDB en lisant sur un secondaire (mongodump, mongorestore --dryRun)',
+  'écrire la chaîne de connexion d’une application à un replica set (facultatif)'
 ];
 // Le rejeu seul : l'apprenant provoque la panne et relance le nœud lui-même.
 export const replay = {

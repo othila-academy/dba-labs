@@ -10,7 +10,8 @@ export const instructions = `L'application lance deux requêtes (elles sont auss
 Lis leur plan, avec .explain('executionStats') : COLLSCAN parcourt toute la collection, IXSCAN passe par un index. Pose dans
 001_catalogue.js les index qui leur conviennent (createIndex), dans l'ordre : champs d'égalité, puis tri.
 Active aussi le profiler de valmorin, au niveau 1, depuis project/mongo : il note les opérations plus lentes que slowms, et il
-se perd à chaque redémarrage du serveur. Après scripts/db rebuild, relance les requêtes, puis :
+se perd à chaque redémarrage du serveur. Repère : niveaux du profiler : 0 arrêté, 1 les opérations plus lentes que slowms,
+2 toutes les opérations, chacune écrite dans system.profile. Après scripts/db rebuild, relance les requêtes, puis :
 db.system.profile.find().sort({ ts: -1 }).limit(3) ; et, dans un autre terminal, pendant que tu les relances :
 mongotop 2 --uri "mongodb://mongo1:27017/?replicaSet=rs0", puis mongostat --uri "mongodb://mongo1:27017/?replicaSet=rs0".
 

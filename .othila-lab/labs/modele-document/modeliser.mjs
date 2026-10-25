@@ -19,6 +19,9 @@ type, et avis_bruts. L'application veut un document par notice, à ce contrat :
 squelette .othila-lab/labs/modele-document/catalogue-squelette.js : le validateur y est écrit, le pipeline est à compléter.
   - il crée catalogue avec un validateur $jsonSchema qui impose ce contrat (validationLevel: 'strict', validationAction: 'error') ;
   - il construit les documents depuis notices_brutes par un pipeline d'agrégation ($lookup sur avis_bruts, $project, $merge).
+Repère, sur un autre exemple : { $switch: { branches: [{ case: { $eq: ['$genre', 'bd'] }, then: … }], default: … } } choisit une
+valeur selon une condition ; { $map: { input: '$liste', as: 'x', in: { $concat: ['$$x.a', '-', '$$x.b'] } } } transforme chaque
+élément d'une liste ($$x désigne l'élément).
 Pour l'essayer sans tout reconstruire : scripts/db mongosh project/mongo/001_catalogue.js (il recrée catalogue). Puis regarde
 un document de chaque type : db.catalogue.findOne({ type: 'jeu' }).
 

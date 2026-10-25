@@ -11,6 +11,7 @@ scripts/db mongosh ne connaît que mongo1, arrêté pendant la panne.
   - écris pendant la panne : db.journal.insertOne({ a: new Date() }, { writeConcern: { w: 'majority' } }) ;
 scripts/db status montre les conteneurs ; scripts/db mongosh mongo2 joint un nœud précis.
 Relance le nœud arrêté : scripts/db up. Il revient SECONDARY : il rattrape ce qu'il a manqué, depuis l'oplog des autres.
+Repère : le term de rs0 (rs.status().term) compte les élections ; il augmente de 1 à chaque primaire élu.
 
 À expliquer (npx lab submit replica-set basculer) : pourquoi le nœud relancé ne reprend-il pas sa place de primaire ?`;
 

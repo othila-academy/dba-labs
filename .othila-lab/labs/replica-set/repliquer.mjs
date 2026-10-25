@@ -11,6 +11,8 @@ export const instructions = `rs0 tourne sur un seul nœud : qu'il tombe, et le c
     mongo3:27017 à rs0 s'ils n'y sont pas (rs.add), fixe la préoccupation d'écriture par défaut à majority
     (db.adminCommand({ setDefaultRWConcern: 1, … })), puis attend que les deux nouveaux membres soient SECONDARY et votent
     (un membre ajouté ne vote qu'après sa synchronisation initiale : rs.status().writableVotingMembersCount) ;
+    Repère : 010_replica.js est du JavaScript mongosh : rs.conf().members donne les membres (champ host), un if n'appelle
+    rs.add que pour un hôte absent, et sleep(500) attend 500 ms dans une boucle for ;
   - scripts/db rebuild, puis scripts/db status : un PRIMARY, deux SECONDARY.
 Toujours mongo2:27017, jamais localhost : chaque membre doit pouvoir joindre les autres sous ce nom.
 

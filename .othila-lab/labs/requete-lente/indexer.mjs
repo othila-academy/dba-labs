@@ -13,9 +13,14 @@ ${Q1};
 Q2, les retards en cours par site :
 ${Q2};
 
+Repère : un plan se lit des nœuds les plus indentés (ils lisent les tables) vers le haut (jointures, regroupement). Un Parallel
+Seq Scan est partagé entre plusieurs processus : ses rows sont par processus, à multiplier par loops.
 Lis leur plan avec explain (analyze, buffers) : quel nœud lit le plus de pages, et combien de lignes garde-t-il ? Pose dans
 project/post/020_perf.sql l'index qui convient à chacune, puis scripts/db rebuild (qui refait ANALYZE), et relis les plans.
-Si ton schéma pose déjà un index sur emprunt (au lab schema), regarde s'il sert Q1 ou Q2, et dis-le dans ton explication.
+Repère : un index ne paie que si sa condition écarte la plupart des lignes ; si elle en garde une grosse part, lire toute la
+table coûte moins cher et le planificateur choisit le Seq Scan.
+\\d emprunt liste les index déjà posés (ceux de l'ancien prestataire, et les tiens s'il y en a) : regarde s'ils servent Q1
+ou Q2, et dis-le dans ton explication.
 
 À expliquer (npx lab submit requete-lente indexer) : pour Q2, pourquoi l'index déjà posé sur date_retour_prevue ne sert-il à rien, et que fait de mieux le tien ?`;
 

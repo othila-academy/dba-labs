@@ -7,6 +7,8 @@ export const instructions = `Lance scripts/db rebuild et lis son étape 4/9 : le
 schéma. Si une contrainte les refuse, rebuild s'arrête et la cite : compare-la au dictionnaire (infra/seed/CONTRAT.md). Qui a
 raison, la règle ou les données ? Corrige, relance, jusqu'au bout. Puis explore, dans scripts/db psql postgres valmorin :
 combien d'emprunts sont en cours ? Combien d'adhérents n'ont pas de téléphone ?
+Repère : select count(*) from <table> where <colonne> is null; compte les lignes où la valeur est absente (« = null »
+ne renvoie jamais vrai).
 
 À expliquer (npx lab submit schema donnees) : quelle contrainte de ton schéma a refusé des données (ou aurait pu le faire), et pourquoi les données avaient-elles raison ?`;
 

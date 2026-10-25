@@ -2,10 +2,11 @@ import { assert } from '@othila-academy/lab';
 import { withPg } from '../../shared/db.mjs';
 
 export const title = 'Voir ce que le serveur exécute';
-export const explain = "Quelles sont les deux requêtes les plus coûteuses, et qu'est-ce qui les distingue des autres ?";
+export const explain = "Quelles sont les deux requêtes les plus coûteuses en temps total, et pourquoi coûtent-elles bien plus que les autres ?";
 export const instructions = `Active l'extension pg_stat_statements, qui compte ce que le serveur exécute. Elle se fait en deux temps :
   - elle se charge au démarrage du serveur : écris project/config/postgres/conf.d/10-monitoring.conf avec
-    shared_preload_libraries ; essaie scripts/db reload pg, lis ce qu'il dit, puis scripts/db restart pg ;
+    shared_preload_libraries ; lance d'abord npx lab check requete-lente surveiller (il pose la prédiction),
+    puis essaie scripts/db reload pg, lis ce qu'il dit, puis scripts/db restart pg ;
   - elle se crée dans la base : project/post/020_perf.sql (joué après les données), puis scripts/db rebuild.
 Rejoue ensuite la charge de l'application :
   scripts/db psql postgres valmorin -f .othila-lab/labs/requete-lente/application.sql
@@ -13,7 +14,7 @@ Rejoue ensuite la charge de l'application :
 scripts/db psql postgres valmorin, cherche dans la vue pg_stat_statements les requêtes qui coûtent le plus (total_exec_time,
 calls, mean_exec_time).
 
-À expliquer (npx lab submit requete-lente surveiller) : quelles sont les deux requêtes les plus coûteuses, et qu'est-ce qui les distingue des autres ?`;
+À expliquer (npx lab submit requete-lente surveiller) : quelles sont les deux requêtes les plus coûteuses en temps total, et pourquoi coûtent-elles bien plus que les autres ?`;
 
 export const prediction = {
   promptId: 'requete-lente-reload',

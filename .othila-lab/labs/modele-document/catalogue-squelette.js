@@ -43,7 +43,11 @@ db.notices_brutes.aggregate([
     $project: {
       type: 1,
       titre: '$titre', // À COMPLÉTER : un jeu n'a pas de titre, mais un nom ($ifNull)
+      // Repère, sur un autre exemple : { $switch: { branches: [{ case: { $eq: ['$genre', 'bd'] }, then: … }], default: … } } ;
+      // { $map: { input: '$liste', as: 'x', in: { $concat: ['$$x.a', '-', '$$x.b'] } } } ($$x désigne l'élément de la liste).
       auteurs: [], // À COMPLÉTER : « Prénom Nom » des auteurs d'un livre ($map, $concat), [réalisateur] pour un DVD, [] sinon ($switch)
+      // Repère : $toInt d'un champ absent rend null ; { $year: '$parution' } extrait l'année d'une date ; $ifNull: [a, b] prend b
+      // quand a est null.
       annee: '$annee', // À COMPLÉTER : toujours un entier ($toInt) ; pour une revue, l'année de sa parution ($year)
       tags: '$tags', // À COMPLÉTER : les mots_cles, pour un jeu ($ifNull)
       avis_recents: [], // À COMPLÉTER : les 5 avis les plus récents ($slice sur '$avis')

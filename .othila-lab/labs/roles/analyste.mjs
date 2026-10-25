@@ -6,7 +6,9 @@ export const explain = "Qu'aurait changé une vue sans email ni téléphone, à 
 export const instructions = `Crée le rôle analyste (mot de passe de lab analyste-lab), pour le service culturel. Il lit tout le
 catalogue, l'historique des prêts et les adhérents, mais jamais leurs coordonnées (email, téléphone) : donne-lui des
 privilèges sur les colonnes de adherent. Il n'écrit rien.
-Puis scripts/db rebuild, connecte-toi avec lui (psql -h pg -U analyste -d valmorin) et essaie select * from adherent.
+Réponds d'abord à la prédiction (npx lab check roles analyste), puis scripts/db rebuild, connecte-toi avec lui (psql -h pg -U analyste -d valmorin) et essaie select * from adherent.
+Repère : une vue est une requête enregistrée (create view … as select …) qu'on interroge comme une table ; on peut accorder
+SELECT sur la vue sans l'accorder sur la table qu'elle lit.
 
 À expliquer (npx lab submit roles analyste) : qu'aurait changé une vue sans email ni téléphone, à la place des privilèges par colonne ?`;
 

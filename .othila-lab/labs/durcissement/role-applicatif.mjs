@@ -7,6 +7,8 @@ export const instructions = `Le rôle de l'application, app_mediatheque, est sup
 le serveur, jusqu'à la machine (COPY … TO PROGRAM exécute une commande). Dans init.sql, retire-lui ce pouvoir, et ceux dont il
 n'a pas besoin (CREATEROLE, CREATEDB), sans casser l'application : elle doit toujours lire et écrire les tables de mediatheque.
 Attention : la table abonne est créée par postgres, après \\connect. À qui appartient-elle alors ?
+Repère : au lab roles, les tables appartenaient à dba_valmorin et l'application n'avait que des GRANT. Ici, aucun rôle
+propriétaire n'existe : les deux voies passent le check ; dis laquelle tu choisis, et si elle laisse DROP TABLE à l'application.
 
 À expliquer (npx lab submit durcissement role-applicatif) : de quoi l'application a-t-elle réellement besoin, et qui doit posséder ses tables ?`;
 
