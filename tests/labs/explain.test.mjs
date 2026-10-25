@@ -19,3 +19,10 @@ test('chaque étape exporte explain, la question « À expliquer » de sa fiche'
   }
   assert.deepEqual(problemes, []);
 });
+
+test('demarrage/explorer : un repère donne la majorité et l’oplog avant la question sur rs0, vue au jour 2 seulement', async () => {
+  const { instructions } = await import(new URL('demarrage/explorer.mjs', labs).href);
+  const avant = instructions.slice(0, instructions.indexOf('À expliquer'));
+  assert.match(avant, /Repère : .*majorité/s);
+  assert.match(avant, /oplog/);
+});

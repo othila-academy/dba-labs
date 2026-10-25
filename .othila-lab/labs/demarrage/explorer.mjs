@@ -8,6 +8,8 @@ version de PostgreSQL et le rôle de chaque nœud MongoDB. Connecte-toi ensuite 
   scripts/db psql       puis \\l (les bases), \\du (les rôles), \\q pour sortir
   scripts/db mongosh    puis rs.status().members, show dbs, exit
 Depuis le devcontainer, PostgreSQL s'appelle pg (port 5432) et MongoDB mongo1 (port 27017) : rien n'est publié sur ta machine.
+Repère : un replica set élit son primaire à la majorité de ses membres, et garde un journal de ses écritures (l'oplog) que
+d'autres nœuds peuvent rejouer.
 
 À expliquer (npx lab submit demarrage explorer) : rs0 est un « replica set » d'un seul nœud. Pourquoi a-t-il quand même un primaire, et à quoi sert-il de démarrer ainsi ?`;
 
