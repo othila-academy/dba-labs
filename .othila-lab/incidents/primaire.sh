@@ -17,6 +17,7 @@ else
   info ""
   info "02:14 — La supervision alerte : $noeud, le nœud primaire de rs0, ne répond plus (serveur arrêté)."
   info "02:15 — Les lecteurs déposent-ils encore leurs avis en ligne ? Personne ne le sait."
-  info "02:16 — À toi : observe rs0 par la chaîne de l'application (project/app.env, les trois hôtes), écris pendant la panne,"
-  info "        puis relance le nœud (scripts/db up) et regarde-le revenir."
+  info "02:16 — À toi : observe rs0 par la chaîne à trois hôtes, qui suit le primaire où qu'il soit :"
+  info "        mongosh \"mongodb://mongo1:27017,mongo2:27017,mongo3:27017/valmorin?replicaSet=rs0\""
+  info "        écris pendant la panne, puis relance le nœud (scripts/db up) et regarde-le revenir."
 fi

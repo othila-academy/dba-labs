@@ -2,7 +2,7 @@
 // runbook et le catalogue, et les pièges du serveur hérité dits dans la fiche.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 const root = new URL('../../', import.meta.url);
@@ -50,4 +50,20 @@ test('durcissement : la fiche donne le mot de passe de postgres et désigne la l
 test('durcissement : le plan de sécurité est la section 6 du dossier', async () => {
   const { instructions } = await step('durcissement', 'plan-securite');
   assert.match(instructions, /dossier/);
+});
+
+test('replica-set : le sharding est expliqué au tableau, sans démonstration', async () => {
+  const { summary } = await lab('replica-set');
+  assert.doesNotMatch(summary, /démonstration/);
+});
+
+test('incident primaire : le récit donne la chaîne à trois hôtes, pas project/app.env (étape facultative)', () => {
+  const recit = readFileSync(new URL('.othila-lab/incidents/primaire.sh', root), 'utf8');
+  assert.doesNotMatch(recit, /app\.env/);
+  assert.match(recit, /mongo1:27017,mongo2:27017,mongo3:27017/);
+});
+
+test('incident-verrou : soumettre debloquer avant le rebuild de prevenir, qui efface le prêt du guichet', async () => {
+  const { instructions } = await step('incident-verrou', 'prevenir');
+  assert.match(instructions, /npx lab submit incident-verrou debloquer/);
 });
