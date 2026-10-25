@@ -5,8 +5,8 @@ import { assert } from '@othila-academy/lab';
 import { ROOT, TIMEOUT_MS, readEnv } from '../../shared/db.mjs';
 import { parseMongoUri } from './rs.mjs';
 
-export const title = 'Connecter l’application';
-export const instructions = `L'application a besoin de sa chaîne de connexion. Écris project/app.env, au format CLE=valeur :
+export const title = 'Facultatif : connecter l’application';
+export const instructions = `Facultatif. L'application a besoin de sa chaîne de connexion. Écris project/app.env, au format CLE=valeur :
   MONGO_URI=mongodb://…
 Elle liste les trois membres et nomme le replica set : le pilote les essaie tous, trouve le primaire, et suit les élections.
 Essaie-la : mongosh "<ta chaîne>" --eval 'db.hello().primary'.

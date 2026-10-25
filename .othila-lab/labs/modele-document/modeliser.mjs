@@ -14,10 +14,12 @@ type, et avis_bruts. L'application veut un document par notice, à ce contrat :
   tags           liste de textes (les mots_cles, pour un jeu)
   avis_recents   les 5 avis les plus récents au plus, du plus récent au plus ancien : { note, date, texte }
   note_moyenne   la moyenne de toutes les notes de la notice, ou null si elle n'a aucun avis
-Écris project/mongo/001_catalogue.js (joué par scripts/db rebuild, avec mongosh, sur la base valmorin) :
+Écris project/mongo/001_catalogue.js (joué par scripts/db rebuild, avec mongosh, sur la base valmorin), en partant du
+squelette .othila-lab/labs/modele-document/catalogue-squelette.js : le validateur y est écrit, le pipeline est à compléter.
   - il crée catalogue avec un validateur $jsonSchema qui impose ce contrat (validationLevel: 'strict', validationAction: 'error') ;
   - il construit les documents depuis notices_brutes par un pipeline d'agrégation ($lookup sur avis_bruts, $project, $merge).
-Puis scripts/db rebuild, et regarde un document de chaque type : db.catalogue.findOne({ type: 'jeu' }).
+Pour l'essayer sans tout reconstruire : scripts/db mongosh project/mongo/001_catalogue.js (il recrée catalogue). Puis regarde
+un document de chaque type : db.catalogue.findOne({ type: 'jeu' }).
 
 À expliquer (npx lab submit modele-document modeliser) : pourquoi ne garder que 5 avis dans le document, et où sont les autres ?`;
 

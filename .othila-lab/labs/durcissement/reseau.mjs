@@ -4,8 +4,8 @@ import path from 'node:path';
 import { assert } from '@othila-academy/lab';
 import { ROOT, TIMEOUT_MS, readEnv } from '../../shared/db.mjs';
 
-export const title = 'Le réseau';
-export const instructions = `project/legacy/compose.yaml publie les ports du serveur hérité sur toutes les interfaces (0.0.0.0) : n'importe quel
+export const title = 'Facultatif : le réseau';
+export const instructions = `Facultatif. project/legacy/compose.yaml publie les ports du serveur hérité sur toutes les interfaces (0.0.0.0) : n'importe quel
 poste du réseau pourrait s'y connecter. scripts/db ramène déjà la publication à 127.0.0.1, par sécurité, et le dit à chaque up :
 corrige la déclaration elle-même. Le mieux est de ne rien publier (le serveur reste joignable depuis dba-net) ; sinon,
 127.0.0.1 seulement. Vérifie : scripts/db up n'affiche plus d'avertissement ; docker port dba-pg-legacy-1.

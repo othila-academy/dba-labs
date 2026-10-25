@@ -8,7 +8,9 @@ Corrige l'authentification, dans project/legacy/postgres/ :
   - pg_hba.conf : plus aucune règle trust ; scram-sha-256 pour toute connexion par le réseau ; en local (le socket du
     conteneur, par lequel scripts/db initialise le serveur), peer pour postgres ;
   - postgresql.conf : password_encryption = scram-sha-256 ;
-  - init.sql : un mot de passe haché en md5 doit être redonné pour être haché en SCRAM.
+  - init.sql : un mot de passe haché en md5 doit être redonné pour être haché en SCRAM. Attention, init.sql commence par
+    set password_encryption = 'md5', qui l'emporte sur postgresql.conf pendant qu'il s'exécute : retire cette ligne.
+Une fois trust retiré, psql -h pg-legacy -U postgres demande un mot de passe : celui du cours, valmorin-lab (infra/.env.lab).
 Le mot de passe de l'application ne change pas (mediatheque2019) : l'équipe applicative ne peut pas le modifier aujourd'hui.
 Puis scripts/db rebuild : il recrée le serveur hérité depuis tes fichiers. pg_hba_file_rules et pg_authid montrent l'effet.
 

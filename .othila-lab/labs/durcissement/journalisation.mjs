@@ -1,8 +1,8 @@
 import { assert } from '@othila-academy/lab';
 import { withLegacyPg } from './legacy.mjs';
 
-export const title = 'Journaliser';
-export const instructions = `Sur le serveur hérité, personne ne sait qui se connecte, ni ce qui est lent. Dans postgresql.conf, journalise :
+export const title = 'Facultatif : journaliser';
+export const instructions = `Facultatif. Sur le serveur hérité, personne ne sait qui se connecte, ni ce qui est lent. Dans postgresql.conf, journalise :
   - les connexions et les déconnexions (log_connections, log_disconnections) ;
   - les requêtes plus lentes qu'un seuil que tu choisis (log_min_duration_statement).
 Puis scripts/db rebuild, connecte-toi, et lis le journal : docker compose -p dba logs pg-legacy.

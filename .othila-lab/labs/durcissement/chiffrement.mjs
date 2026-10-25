@@ -5,8 +5,8 @@ import { DOWN, ROOT, withPg } from '../../shared/db.mjs';
 import { gitStatusOf } from '../../shared/fichiers.mjs';
 import { APP_PG, LEGACY_DOWN, withLegacyPg } from './legacy.mjs';
 
-export const title = 'Chiffrer les connexions';
-export const instructions = `Mots de passe et données passent en clair sur le réseau. Active le chiffrement de pg-legacy :
+export const title = 'Facultatif : chiffrer les connexions';
+export const instructions = `Facultatif. Mots de passe et données passent en clair sur le réseau. Active le chiffrement de pg-legacy :
   - écris project/legacy/gen-cert.sh, exécutable : il génère, s'ils manquent, un certificat auto-signé et sa clé privée
     (openssl req -x509 -newkey rsa:2048 -nodes …) dans project/legacy/postgres/ ; scripts/db le lance avant de démarrer le
     serveur hérité, à chaque up et à chaque rebuild ;

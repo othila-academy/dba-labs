@@ -1,10 +1,10 @@
 export const title = 'Durcissement du serveur hérité';
-export const steps = ['authentification', 'role-applicatif', 'chiffrement', 'journalisation', 'mongo', 'reseau', 'plan-securite', 'tls-mongo'];
+export const steps = ['authentification', 'role-applicatif', 'mongo', 'plan-securite', 'chiffrement', 'journalisation', 'reseau', 'tls-mongo'];
 export const duration = '1 h 30';
 export const summary = `Mise en situation. L'ancien prestataire a laissé deux serveurs à la médiathèque, pg-legacy et mongo-legacy, aussi
 ouverts qu'on peut l'être. Tu les sécurises, un point après l'autre, dans project/legacy/ : c'est là qu'est leur configuration,
-et scripts/db rebuild les recrée depuis tes fichiers. Puis tu écris la stratégie de sécurité des deux bases. La dernière étape,
-facultative, chiffre aussi MongoDB.
+et scripts/db rebuild les recrée depuis tes fichiers. Puis tu écris la stratégie de sécurité des deux bases. Les quatre dernières étapes
+sont facultatives (chiffrement, journalisation, réseau, TLS de MongoDB) : en fin de lab si tu as le temps, ou chez toi.
 Avant ce lab : COMPOSE_PROFILES=rs,legacy dans project/stack.env, puis scripts/db rebuild (lis project/legacy/README.md).`;
 export const objectives = [
   'lire et corriger pg_hba.conf',

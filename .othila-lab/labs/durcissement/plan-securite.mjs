@@ -11,7 +11,8 @@ export const instructions = `Écris project/legacy/PLAN-SECURITE.md, la stratég
   ## Mesures organisationnelles : comptes nominatifs, rotation des mots de passe, revue des droits, secrets hors de git ;
   ## Sauvegarde et reprise : RPO et RTO visés, ce que font backup.sh et backup-mongo.sh, les tests de restauration ;
   ## Surveillance : ce qu'on journalise, qui le lit, quelles alertes (connexions refusées, requêtes lentes, verrous).
-Le formateur évalue le fond ; le check ne regarde que les titres des sections.
+C'est la section 6 de ton dossier : écris-la une fois, dans le dossier, puis copie-la ici avec ses cinq titres (## …), pour le
+check. Le formateur évalue le fond, dans le dossier ; le check ne regarde que les titres des sections.
 
 À expliquer (npx lab submit durcissement plan-securite) : quelle menace de ta liste reste la plus probable une fois ce lab fait, et pourquoi ?`;
 
