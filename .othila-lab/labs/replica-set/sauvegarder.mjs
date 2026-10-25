@@ -7,6 +7,7 @@ import { BACKUPS, latestFile, requireExecutable } from '../../shared/fichiers.mj
 import { RS_URI } from './rs.mjs';
 
 export const title = 'Sauvegarder MongoDB';
+export const explain = 'Pourquoi lire la sauvegarde sur un secondaire, et que risque-t-on si ce secondaire est en retard ?';
 export const instructions = `Une réplique n'est pas une sauvegarde : un drop sur le primaire part aussitôt sur les secondaires. Écris
 project/ops/backup-mongo.sh, exécutable, qui :
   - sauvegarde la base valmorin avec mongodump, en une archive compressée : backups/valmorin-mongo-AAAAMMJJ-HHMMSS.archive

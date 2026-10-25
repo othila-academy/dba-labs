@@ -2,6 +2,7 @@ import { expectAccepted, expectDenied, inRollback } from '../../shared/db.mjs';
 import { EMPRUNT_RENDU, as } from '../../shared/valmorin.mjs';
 
 export const title = 'Le rôle de l’application';
+export const explain = 'Quel privilège as-tu refusé à app_valmorin, et quelle erreur ou quelle attaque cela empêche-t-il ?';
 export const instructions = `Crée dans 010_roles.sql le rôle app_valmorin, celui de l'application des médiathèques, avec le mot de
 passe de lab app-valmorin-lab. L'application lit et modifie les données de toutes les tables (inscriptions, prêts, retours),
 mais elle ne change jamais la structure de la base et ne supprime jamais une table. Puis scripts/db rebuild, et essaie en te

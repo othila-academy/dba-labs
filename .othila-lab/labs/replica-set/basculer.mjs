@@ -3,6 +3,7 @@ import { withMongo } from '../../shared/db.mjs';
 import { RS_URI, etat, rsStatus } from './rs.mjs';
 
 export const title = 'La panne du primaire';
+export const explain = 'Pourquoi le nœud relancé ne reprend-il pas sa place de primaire ?';
 export const instructions = `Lance scripts/db incident primaire. Puis connecte-toi à rs0 comme l'application, par les trois hôtes :
 scripts/db mongosh ne connaît que mongo1, arrêté pendant la panne.
   mongosh "mongodb://mongo1:27017,mongo2:27017,mongo3:27017/valmorin?replicaSet=rs0"

@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { readEnv, withMongo, withPg } from '../../shared/db.mjs';
 
 export const title = 'Faire le tour de la stack';
+export const explain = "Rs0 est un « replica set » d'un seul nœud. Pourquoi a-t-il quand même un primaire, et à quoi sert-il de démarrer ainsi ?";
 export const instructions = `Dans le terminal du devcontainer, lance scripts/db status : il liste les services, leur santé, la
 version de PostgreSQL et le rôle de chaque nœud MongoDB. Connecte-toi ensuite à chaque base :
   scripts/db psql       puis \\l (les bases), \\du (les rôles), \\q pour sortir

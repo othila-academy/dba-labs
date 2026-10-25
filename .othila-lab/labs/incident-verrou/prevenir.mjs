@@ -5,6 +5,7 @@ import { requireExecutable } from '../../shared/fichiers.mjs';
 import { as } from '../../shared/valmorin.mjs';
 
 export const title = 'Prévenir la récidive';
+export const explain = "Pourquoi poser ces délais sur le rôle de l'application plutôt que sur tout le serveur ?";
 export const instructions = `Avant tout : soumets l'étape précédente (npx lab submit incident-verrou debloquer). Le scripts/db
 rebuild de cette étape efface le prêt du guichet, que le check de debloquer vérifie.
 Pour que cela ne se reproduise pas, pose deux garde-fous sur le seul rôle app_valmorin, dans

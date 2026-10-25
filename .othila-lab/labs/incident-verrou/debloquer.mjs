@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { withPg } from '../../shared/db.mjs';
 
 export const title = 'Débloquer le guichet';
+export const explain = 'Comment as-tu reconnu la session fautive, et pourquoi la terminer elle plutôt que le guichet ?';
 export const instructions = `Lance scripts/db incident verrou, et lis ce qui vient de se passer. Puis, en postgres (scripts/db psql postgres valmorin) :
   - pg_stat_activity montre chaque session : qui (usename, application_name), dans quel état (state), depuis quand
     (xact_start, state_change) et ce qu'elle attend (wait_event_type) ;

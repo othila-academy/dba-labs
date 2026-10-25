@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { APP_MONGO, withLegacyMongo } from './legacy.mjs';
 
 export const title = 'L’authentification de MongoDB';
+export const explain = "Pourquoi l'exception localhost devient-elle un risque si l'on oublie de créer l'administrateur ?";
 export const instructions = `mongo-legacy accepte tout le monde, sans identifiants. Dans project/legacy/mongo/ :
   - mongod.conf : security.authorization: enabled ;
   - init.js, joué par scripts/db rebuild depuis le conteneur, par l'exception localhost (tant qu'aucun utilisateur n'existe,

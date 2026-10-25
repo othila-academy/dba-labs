@@ -4,6 +4,7 @@ import { CONTRAT, VALIDE } from './contrat.mjs';
 import { RS0 } from './requetes.mjs';
 
 export const title = 'Modéliser le catalogue';
+export const explain = 'Pourquoi ne garder que 5 avis dans le document, et où sont les autres ?';
 export const instructions = `Le catalogue vient de deux exports bruts (lis infra/seed/CONTRAT.md) : notices_brutes, hétérogènes selon le
 type, et avis_bruts. L'application veut un document par notice, à ce contrat :
   _id            l'_id de la notice (entier)

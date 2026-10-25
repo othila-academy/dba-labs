@@ -5,6 +5,7 @@ import { ROOT } from '../../shared/db.mjs';
 import { missingSections } from '../../shared/fichiers.mjs';
 
 export const title = 'Justifier le modèle';
+export const explain = "Quand un lecteur ajoute un avis, qu'est-ce qui doit être mis à jour dans ton modèle ?";
 export const instructions = `Écris project/mongo/MODELE.md, pour l'équipe qui maintiendra le catalogue, avec au moins deux sections :
   ## Choix d'imbrication : ce que tu as imbriqué (auteurs, avis récents), ce qui reste à part (tous les avis), et pourquoi ;
      le motif « subset » : garder dans le document ce que l'écran affiche, et le reste ailleurs ;

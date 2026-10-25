@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { withLegacyPg } from './legacy.mjs';
 
 export const title = 'Facultatif : journaliser';
+export const explain = 'Quel seuil as-tu choisi pour les requêtes lentes, et que coûterait 0 ?';
 export const instructions = `Facultatif. Sur le serveur hérité, personne ne sait qui se connecte, ni ce qui est lent. Dans postgresql.conf, journalise :
   - les connexions et les déconnexions (log_connections, log_disconnections) ;
   - les requêtes plus lentes qu'un seuil que tu choisis (log_min_duration_statement).

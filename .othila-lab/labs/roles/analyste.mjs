@@ -2,6 +2,7 @@ import { expectAccepted, expectDenied, inRollback } from '../../shared/db.mjs';
 import { as } from '../../shared/valmorin.mjs';
 
 export const title = 'La lecture analytique';
+export const explain = "Qu'aurait changé une vue sans email ni téléphone, à la place des privilèges par colonne ?";
 export const instructions = `Crée le rôle analyste (mot de passe de lab analyste-lab), pour le service culturel. Il lit tout le
 catalogue, l'historique des prêts et les adhérents, mais jamais leurs coordonnées (email, téléphone) : donne-lui des
 privilèges sur les colonnes de adherent. Il n'écrit rien.

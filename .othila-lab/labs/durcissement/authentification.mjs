@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { withLegacyPg } from './legacy.mjs';
 
 export const title = 'L’authentification de PostgreSQL';
+export const explain = 'Pourquoi un mot de passe haché en md5 ne devient-il pas SCRAM quand on change seulement password_encryption ?';
 export const instructions = `Le serveur hérité est décrit dans project/legacy/ (lis son README). Active-le : COMPOSE_PROFILES=rs,legacy dans
 project/stack.env, puis scripts/db rebuild. Connecte-toi : psql -h pg-legacy -U postgres. Aucun mot de passe demandé : pourquoi ?
 Corrige l'authentification, dans project/legacy/postgres/ :

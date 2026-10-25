@@ -4,6 +4,7 @@ import { planOf, seqScansOn } from '../../shared/plan.mjs';
 import { Q1, Q2 } from './requetes.mjs';
 
 export const title = 'Lire les plans, poser les index';
+export const explain = "Pour Q2, pourquoi l'index déjà posé sur date_retour_prevue ne sert-il à rien, et que fait de mieux le tien ?";
 export const instructions = `Les deux requêtes de l'application (elles sont aussi dans application.sql) :
 
 Q1, l'historique d'un adhérent :

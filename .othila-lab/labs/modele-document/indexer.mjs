@@ -3,6 +3,7 @@ import { withMongo } from '../../shared/db.mjs';
 import { Q1, Q2, RS0, planOf } from './requetes.mjs';
 
 export const title = 'Indexer, et surveiller';
+export const explain = 'Pourquoi tags, un champ de liste, peut-il entrer dans un index, et que coûte le profiler au niveau 2 ?';
 export const instructions = `L'application lance deux requêtes (elles sont aussi dans application.js, à côté de cette fiche) :
   Q1, les mieux notés d'un thème : db.catalogue.find({ type: 'livre', tags: 'policier' }).sort({ note_moyenne: -1 }).limit(10)
   Q2, les œuvres d'un auteur : db.catalogue.find({ auteurs: 'Claire Faure' }).sort({ annee: -1 })

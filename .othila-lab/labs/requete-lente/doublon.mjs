@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { withPg } from '../../shared/db.mjs';
 
 export const title = 'Facultatif : l’index en double';
+export const explain = 'Comment as-tu prouvé que les deux index étaient identiques, et lequel as-tu gardé ?';
 export const instructions = `Facultatif. L'ancien prestataire a posé des index sur emprunt : \\d emprunt (dans scripts/db psql postgres valmorin) les liste. Deux d'entre eux
 sont identiques, sous deux noms. Un index inutile ne coûte rien en lecture, mais chaque insertion et chaque mise à jour de
 emprunt doit le maintenir, et il occupe de la place : select pg_size_pretty(pg_relation_size('<nom de l''index>'));

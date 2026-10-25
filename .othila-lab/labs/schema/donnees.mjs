@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { withPg } from '../../shared/db.mjs';
 
 export const title = 'Les données de l’ancien logiciel';
+export const explain = 'Quelle contrainte de ton schéma a refusé des données (ou aurait pu le faire), et pourquoi les données avaient-elles raison ?';
 export const instructions = `Lance scripts/db rebuild et lis son étape 4/9 : les données de l'ancien logiciel se chargent sur ton
 schéma. Si une contrainte les refuse, rebuild s'arrête et la cite : compare-la au dictionnaire (infra/seed/CONTRAT.md). Qui a
 raison, la règle ou les données ? Corrige, relance, jusqu'au bout. Puis explore, dans scripts/db psql postgres valmorin :

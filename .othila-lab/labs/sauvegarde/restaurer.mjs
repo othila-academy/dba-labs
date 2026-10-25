@@ -4,6 +4,7 @@ import { EMPRUNT_RENDU, as } from '../../shared/valmorin.mjs';
 import { RUNBOOK, requireExecutable } from './fichiers.mjs';
 
 export const title = 'Restaurer, et écrire le runbook';
+export const explain = "Pourquoi ne pas restaurer tout le dump, et qu'aurait-on perdu ?";
 export const instructions = `Lance scripts/db incident sauvegarde, et lis ce qui vient de se passer. Puis remets la base en service :
   - restaure la table emprunt depuis ton dump, avec ses données, ses clés, ses index et ses droits ;
   - sans toucher au reste : les adhérents inscrits depuis la sauvegarde doivent rester là.

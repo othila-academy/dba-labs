@@ -1,6 +1,7 @@
 import { withLegacyMongo } from './legacy.mjs';
 
 export const title = 'Facultatif : TLS pour MongoDB';
+export const explain = "Que faudrait-il pour passer en requireTLS sans gêner l'exploitation ?";
 export const instructions = `Facultatif. Chiffre aussi mongo-legacy. gen-cert.sh génère un second certificat (CN=mongo-legacy) dans
 project/legacy/mongo/. mongod attend un seul fichier PEM, clé et certificat bout à bout, et, depuis MongoDB 7, une autorité de
 confiance (CAFile) : ici, le certificat lui-même. Dans mongod.conf, net.tls :

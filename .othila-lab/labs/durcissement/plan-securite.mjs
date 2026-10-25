@@ -5,6 +5,7 @@ import { ROOT } from '../../shared/db.mjs';
 import { missingSections } from '../../shared/fichiers.mjs';
 
 export const title = 'La stratégie de sécurité';
+export const explain = 'Quelle menace de ta liste reste la plus probable une fois ce lab fait, et pourquoi ?';
 export const instructions = `Écris project/legacy/PLAN-SECURITE.md, la stratégie de sécurité des deux bases de la médiathèque, avec ces sections :
   ## Menaces : qui, quoi, comment (un poste du réseau, une injection SQL, un mot de passe volé, l'erreur d'un stagiaire…) ;
   ## Mesures techniques : ce que tu as corrigé dans ce lab, et ce qui reste (chiffrement des sauvegardes, TLS de MongoDB…) ;

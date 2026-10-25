@@ -6,6 +6,7 @@ import { ROOT, TIMEOUT_MS } from '../../shared/db.mjs';
 import { BACKUPS, BACKUP_SCRIPT, latestDump, requireExecutable } from './fichiers.mjs';
 
 export const title = 'Sauvegarder';
+export const explain = 'Avec une sauvegarde par nuit, quel est ton RPO, et que faudrait-il pour le réduire ?';
 export const instructions = `Écris project/ops/backup.sh, un script Bash exécutable (chmod +x), qui :
   - sauvegarde la base donnée en argument (valmorin par défaut) avec pg_dump au format custom (-Fc), en postgres, avec le
     mot de passe de infra/.env.lab ;

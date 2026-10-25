@@ -3,6 +3,7 @@ import { TIMEOUT_MS, withMongo } from '../../shared/db.mjs';
 import { RS_URI, etat, rsStatus } from './rs.mjs';
 
 export const title = 'Répliquer';
+export const explain = 'Avec trois membres, combien peuvent tomber sans que les écritures majority échouent, et pourquoi pas deux membres seulement ?';
 export const instructions = `rs0 tourne sur un seul nœud : qu'il tombe, et le catalogue est perdu. Passe-le à trois membres :
   - ajoute le profil rs à project/stack.env (COMPOSE_PROFILES=rs), puis scripts/db up : mongo2 et mongo3 démarrent, vides,
     hors de rs0 ;

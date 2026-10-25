@@ -5,6 +5,7 @@ import { requireDictionary } from './catalogue.mjs';
 import { adherentRow, auteurRow, empruntRow, exemplaireRow, fixture, insertAdherent, insertSite, ouvrageRow } from './fixture.mjs';
 
 export const title = 'Les règles métier';
+export const explain = "Quelle règle as-tu failli écrire trop stricte, et qu'aurait-elle refusé ?";
 export const instructions = `Fais respecter les règles métier par la base, pas par l'application :
   - le numéro de carte et l'email d'un adhérent sont uniques ;
   - l'ISBN d'un ouvrage est unique quand il est connu (certains ouvrages n'en ont pas) ;

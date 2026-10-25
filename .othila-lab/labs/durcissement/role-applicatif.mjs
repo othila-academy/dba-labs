@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { APP_PG, withLegacyPg } from './legacy.mjs';
 
 export const title = 'Le rôle de l’application';
+export const explain = "De quoi l'application a-t-elle réellement besoin, et qui doit posséder ses tables ?";
 export const instructions = `Le rôle de l'application, app_mediatheque, est superuser : une injection SQL dans l'application donnerait tout
 le serveur, jusqu'à la machine (COPY … TO PROGRAM exécute une commande). Dans init.sql, retire-lui ce pouvoir, et ceux dont il
 n'a pas besoin (CREATEROLE, CREATEDB), sans casser l'application : elle doit toujours lire et écrire les tables de mediatheque.

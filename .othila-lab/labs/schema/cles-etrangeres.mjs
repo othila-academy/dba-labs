@@ -4,6 +4,7 @@ import { FOREIGN_KEYS } from '../../shared/valmorin.mjs';
 import { exemplaireRow, fixture, insertSite } from './fixture.mjs';
 
 export const title = 'Les clés étrangères';
+export const explain = "Que deviendrait l'historique des prêts avec ON DELETE CASCADE sur emprunt.adherent_id ?";
 export const instructions = `Relie les tables : chaque colonne <table>_id du dictionnaire désigne une ligne d'une autre table, et
 la base doit refuser une référence vers une ligne qui n'existe pas. Décide aussi ce qui arrive quand on supprime une ligne
 référencée : la fiche dit qu'on ne supprime jamais un adhérent qui a un historique d'emprunts.

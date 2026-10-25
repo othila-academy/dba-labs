@@ -2,6 +2,7 @@ import { assert } from '@othila-academy/lab';
 import { withPg } from '../../shared/db.mjs';
 
 export const title = 'Voir ce que le serveur exécute';
+export const explain = "Quelles sont les deux requêtes les plus coûteuses, et qu'est-ce qui les distingue des autres ?";
 export const instructions = `Active l'extension pg_stat_statements, qui compte ce que le serveur exécute. Elle se fait en deux temps :
   - elle se charge au démarrage du serveur : écris project/config/postgres/conf.d/10-monitoring.conf avec
     shared_preload_libraries ; essaie scripts/db reload pg, lis ce qu'il dit, puis scripts/db restart pg ;

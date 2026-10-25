@@ -5,6 +5,7 @@ import { assert } from '@othila-academy/lab';
 import { ROOT, TIMEOUT_MS, readEnv } from '../../shared/db.mjs';
 
 export const title = 'Facultatif : le réseau';
+export const explain = 'Pourquoi corriger la déclaration, si scripts/db protège déjà ce poste ?';
 export const instructions = `Facultatif. project/legacy/compose.yaml publie les ports du serveur hérité sur toutes les interfaces (0.0.0.0) : n'importe quel
 poste du réseau pourrait s'y connecter. scripts/db ramène déjà la publication à 127.0.0.1, par sécurité, et le dit à chaque up :
 corrige la déclaration elle-même. Le mieux est de ne rien publier (le serveur reste joignable depuis dba-net) ; sinon,

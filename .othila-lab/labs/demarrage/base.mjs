@@ -4,6 +4,7 @@ import { assert } from '@othila-academy/lab';
 import { ROOT, withPg } from '../../shared/db.mjs';
 
 export const title = 'Créer la base valmorin';
+export const explain = 'Pourquoi décrire la base dans un fichier plutôt que la créer dans psql ?';
 export const instructions = `Crée la base valmorin dans un fichier : project/schema/000_database.sql. scripts/db rebuild joue les
 fichiers de project/schema dans l'ordre de leur nom : ceux qui commencent par 000_ sur la base postgres (une base se crée
 depuis une autre), les suivants sur valmorin. Lance scripts/db rebuild, puis vérifie avec \\l dans scripts/db psql.
